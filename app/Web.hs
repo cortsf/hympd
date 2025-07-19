@@ -36,7 +36,6 @@ page content = do
       script_ [src_ "static/styles.css"] ("" :: String)
       script_ [src_ "static/icons.js"] ("" :: String)
       link_ [rel_ "shortcut icon", href_ "data:,"]
-      script_ [] $ (A.encodeToLazyText $ [SongList 1 "hello"])
     body_ [class_ "overflow-y-scroll flex flex-col h-screen bg-blue-100"] $ do
       nav
       div_ [class_ "max-w-screen-xl w-full flex flex-wrap flex-col flex-grow mx-auto p-4 pt-18 pb-20 bg-white"] $ do
