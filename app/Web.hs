@@ -3,11 +3,12 @@
 module Web where
 
 import Javascript
+import Utility
 
 import Data.Aeson qualified as A
 import Data.Aeson.Text qualified as A
 import Control.Monad.IO.Class
-import Data.Maybe (listToMaybe, maybeToList)
+import Data.Maybe (listToMaybe, maybeToList, fromMaybe)
 import Data.Time.Clock.POSIX
 import Data.String(fromString)
 import Data.Time.Format
@@ -20,7 +21,7 @@ import GHC.Generics
 import qualified Data.Text as T
 import qualified Network.MPD as MPD
 import qualified Data.Map.Strict as C
-import qualified System.FilePath.Posix as F
+import qualified System.FilePath.Posix as FP
 
 ------------------------------------------------------------
 -- Common
@@ -72,9 +73,6 @@ footer = div_ [class_ "bg-white border-gray-200 dark:bg-slate-600 fixed bottom-0
 ------------------------------------------------------------
 -- Individual Pages
 ------------------------------------------------------------
-unId :: MPD.Id -> Int
-unId (MPD.Id n) = n
-
 queuePage :: Handler (Html ())
 queuePage = do
   playlist <- liftIO $ MPD.withMPD $ MPD.playlistInfo Nothing
@@ -87,10 +85,9 @@ queuePage = do
                           tr_ [class_ "my-0 odd:bg-slate-50 even:bg-white hover:bg-sky-100 flex place-content-between"] $ do
                            td_ [class_ "text-gray-500 flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
                            td_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)),  class_ "py-2 flex place-content-between flex-grow hover:text-sky-600"] $ do
-                             -- div_ ([class_ "text-ellipsis"] <> (maybe [] (\songId -> [(data_ . "song-id" songId)] MPD.stSongID song))) $ toHtml $ 
                              div_ ([class_ "text-ellipsis songId"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ toHtml $ 
                                maybe
-                               (F.takeBaseName $ MPD.toString $ MPD.sgFilePath song)
+                               (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song)
                                (\x -> maybe "No title metadata" MPD.toString (listToMaybe x))
                                (C.lookup MPD.Title (MPD.sgTags song))
                              div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
@@ -111,17 +108,17 @@ browsePage query_path = do
                            case item of
                              MPD.LsDirectory path -> do
                                mkItemIcon "folder"
-                               td_ [class_ "pl-4 py-2 overflow-hidden grow hover:cursor-pointer", onclick_ $ "location.href='" <> (("/browse?path=" :: T.Text) <> (MPD.toText path)) <> "'"] $ toHtml $ MPD.toString path
+                               td_ [class_ "pl-4 py-2 overflow-hidden grow hover:cursor-pointer", onclick_ $ "location.href='" <> (("/browse?path=" :: T.Text) <> (MPD.toText path)) <> "'"] $ toHtml $ fromMaybe "__" ((FP.splitDirectories $ MPD.toString path) !!? (( length $ FP.splitDirectories $ MPD.toString path ) - 1))
                                mkQueueButtons(T.pack $ MPD.toString path)
                              MPD.LsSong song -> do
                                mkItemIcon "music"
                                td_ [class_ "pl-4 py-2 overflow-hidden grow flex place-content-between"] $ do
-                                 div_ $ toHtml $ maybe (F.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> maybe "No title metadata msg2" MPD.toString (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags song))
+                                 div_ $ toHtml $ maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> maybe "No title metadata msg2" (FP.takeFileName . MPD.toString) (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags song))
                                  div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
                                mkQueueButtons(T.pack $ MPD.toString $ MPD.sgFilePath song)
                              MPD.LsPlaylist playlist -> do 
                                mkItemIcon "list"
-                               td_ [class_ "pl-4 py-2 overflow-hidden grow"] $ toHtml $ MPD.toString playlist
+                               td_ [class_ "pl-4 py-2 overflow-hidden grow"] $ toHtml $ FP.takeFileName $ MPD.toString playlist
                                mkQueueButtons(T.pack $ MPD.toString $ playlist)
                        ) (sortBy (\x y -> 
                                     case (x, y) of
