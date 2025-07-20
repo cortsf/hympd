@@ -1,7 +1,9 @@
 module Utility where
-import qualified Network.MPD as MPD
+import Network.MPD qualified as MPD
+import Data.Aeson qualified as A 
+import GHC.Generics qualified as G
 
-data SongList = SongList { songId :: Int, songName :: String } deriving Generic
+data SongList = SongList { songId :: Int, songName :: String } deriving G.Generic
 instance A.ToJSON SongList
 
 unId :: MPD.Id -> Int
