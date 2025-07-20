@@ -3,8 +3,8 @@ module Javascript where
 import Language.Javascript.JMacro
 import Data.Text as T
 
-jsblock :: T.Text
-jsblock = T.show $ renderJs $ [jmacro| 
+jsblock :: Int -> T.Text
+jsblock port = T.show $ renderJs $ [jmacro| 
                                      var refreshIntervalId;
                                      var currentTime = 0.0;
 
@@ -53,12 +53,24 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      };
 
                                      function setSongTitleOnFooter (stSongID, stState) { 
-                                       console.log('setSongTitleOnFooter only works on queue. ' + stSongID + '_' + stState)
+                                       console.log('This implementation only works on queue. ' + stSongID + '_' + stState)
                                        //if(stState == "Stopped"){
                                        //  document.querySelector('#currentSong').innerHTML='..';
                                        //} else {
                                        //  document.querySelector('#currentSong').innerHTML=document.querySelector("div.songId[data-songId='"+stSongID+"']").innerHTML;
                                        //};
+                                     };
+
+                                     function highlightCurrentSongOnQueue (stSongID, stState) { 
+                                       if ( window.location.pathname == "/queue" ){
+                                         console.log('on queue!! ' + stSongID + '_' + stState)
+                                         if(stState == "Stopped"){
+                                           document.querySelector("div.songId.font-semibold").parentNode.classList.remove('font-semibold');
+                                         } else {
+                                           document.querySelectorAll(".font-semibold").forEach(function(x){x.classList.remove('font-semibold');console.log('hi!!')});
+                                           document.querySelector("div.songId[data-songId='"+stSongID+"']").parentNode.classList.add('font-semibold');
+                                         };
+                                       };
                                      };
 
                                      function setPlaybackState (stState) { 
@@ -71,7 +83,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      };
 
                                      //// SOCKET ////
-                                     socket = new WebSocket("ws://localhost:3009/websocket");
+                                     socket = new WebSocket("ws://localhost:" + `port` + "/websocket");
                                      socket.onopen = function() {
                                        document.querySelector('#navPrevious').addEventListener('click', function() {socket.send('previous')}, false);
                                        document.querySelector('#navStop').addEventListener('click', function (){socket.send('stop')}, false);
@@ -84,9 +96,10 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        var status = JSON.parse(event.data);
                                        console.log('new_message: ' + JSON.stringify(status));
                                        setVolume(status.stVolume);
-                                       setSongTitleOnFooter(status.stSongID, status.stState);
+                                       //setSongTitleOnFooter(status.stSongID, status.stState);
                                        setPlaybackState(status.stState);
-                                       setProgress(status.stTime, status.stState)
+                                       setProgress(status.stTime, status.stState);
+                                       highlightCurrentSongOnQueue(status.stSongID, status.stState);
                                      };
 
                                      socket.onerror = function(error_msg) {

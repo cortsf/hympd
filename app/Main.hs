@@ -60,10 +60,10 @@ webApi = Proxy
 
 -- * app
 
-server :: Server WebApi
-server = queuePage :<|> 
-         browsePage :<|> 
-         settingsPage :<|> 
+server :: Int -> Server WebApi
+server port = queuePage port :<|> 
+         browsePage port :<|> 
+         settingsPage port :<|> 
          streamData :<|> 
          (serveDirectoryWebApp "static")
 
@@ -74,7 +74,7 @@ runServer port = do
         setPort port $
         setBeforeMainLoop (hPutStrLn stderr ("Listening on port " ++ show port)) $
         defaultSettings
-  runSettings settings =<< mkApp
+  runSettings settings =<< (mkApp port)
 
-mkApp :: IO Application
-mkApp = return $ serve webApi server
+mkApp :: Int -> IO Application
+mkApp port = return $ serve webApi (server port)

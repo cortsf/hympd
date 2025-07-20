@@ -26,8 +26,8 @@ import qualified System.FilePath.Posix as FP
 ------------------------------------------------------------
 -- Common
 ------------------------------------------------------------
-page :: Html () -> Handler (Html ())
-page content = do
+page :: Int -> Html () -> Handler (Html ())
+page port content = do
   pure $ html_ $ do
     head_ $ do
       title_ "Hympd"
@@ -40,7 +40,7 @@ page content = do
         content
       footer
       script_ $ "feather.replace();"
-      script_ $ jsblock
+      script_ $ jsblock port
     
 
 
@@ -70,10 +70,10 @@ footer = div_ [class_ "bg-white border-gray-200 dark:bg-slate-600 fixed bottom-0
 ------------------------------------------------------------
 -- Individual Pages
 ------------------------------------------------------------
-queuePage :: Handler (Html ())
-queuePage = do
+queuePage :: Int -> Handler (Html ())
+queuePage port = do
   playlist <- liftIO $ MPD.withMPD $ MPD.playlistInfo Nothing
-  page $ do
+  page port $ do
     p_ [class_ "text-2xl"] "Queue"
     case playlist of
       Left _ -> p_ "playlist error"
@@ -93,10 +93,10 @@ queuePage = do
                              button_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('deleteId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "trash-2"] ""
                        ) pl
 
-browsePage :: Maybe String -> Handler (Html ())
-browsePage query_path = do
+browsePage :: Int -> Maybe String -> Handler (Html ())
+browsePage port query_path = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.lsInfo $ maybe "" (fromString . id) query_path
-  page $ do
+  page port $ do
     p_ [class_ "text-2xl"] "Browse"
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
@@ -138,11 +138,11 @@ browsePage query_path = do
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "hover:text-cyan-200"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
       button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "hover:text-cyan-200"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
 
-settingsPage :: Handler (Html ())
-settingsPage = do
+settingsPage :: Int -> Handler (Html ())
+settingsPage port = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.config
   mpdStatus <- liftIO $ MPD.withMPD $ MPD.status
-  page $ do
+  page port $ do
     p_ [class_ "text-2xl"] "Settings"
     div_ [class_ "bg-gray-200 mt-4 p-4"] $ toHtml $ show mpdStatus
     div_ [class_ "bg-blue-200 mt-4 w-full"] $ toHtml $ show mpdResult
