@@ -1,3 +1,5 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -20,10 +22,29 @@ import System.IO
 import Lucid
 import Servant.HTML.Lucid
 import Servant.API.WebSocket
+import Options.Applicative
+
+data Config = Config
+  { port :: Int
+  }
+  deriving (Show)
+
+parseArgs :: IO Config
+parseArgs = execParser $ info confParser (progDesc "Hympd MPD client")
+
+confParser :: Parser Config
+confParser = do
+  port <-
+    option auto $
+      long "port"
+        <> metavar "INT"
+        <> help "port (web interface)"
+  pure $ Config {..}
 
 main :: IO ()
 main = do
-  runServer
+  args <- parseArgs
+  runServer $ port args
 
 -- * api
 
@@ -47,10 +68,9 @@ server = queuePage :<|>
          (serveDirectoryWebApp "static")
 
 
-runServer :: IO ()
-runServer = do
-  let port = 3009
-      settings =
+runServer :: Int -> IO ()
+runServer port = do
+  let settings =
         setPort port $
         setBeforeMainLoop (hPutStrLn stderr ("Listening on port " ++ show port)) $
         defaultSettings
