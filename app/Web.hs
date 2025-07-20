@@ -26,8 +26,11 @@ import qualified System.FilePath.Posix as FP
 ------------------------------------------------------------
 -- Common
 ------------------------------------------------------------
-page :: Int -> Html () -> Handler (Html ())
-page port content = do
+
+data Page = Queue | Browse | Settings deriving Eq
+
+page :: Int -> Page -> Html () -> Handler (Html ())
+page port current_page content = do
   pure $ html_ $ do
     head_ $ do
       title_ "Hympd"
@@ -35,28 +38,26 @@ page port content = do
       script_ [src_ "static/icons.js"] ("" :: String)
       link_ [rel_ "shortcut icon", href_ "data:,"]
     body_ [class_ "overflow-y-scroll flex flex-col h-screen bg-blue-100 focus:outline-none"] $ do
-      nav
+      nav current_page
       div_ [class_ "max-w-screen-xl w-full flex flex-wrap flex-col flex-grow mx-auto p-4 pt-18 pb-20 bg-white"] $ do
         content
       footer
       script_ $ "feather.replace();"
       script_ $ jsblock port
-    
 
-
-nav :: Html ()
-nav = nav_ [class_ "bg-white border-gray-200 dark:bg-gray-900 fixed w-full"] $ do
+nav :: Page -> Html ()
+nav current_page = nav_ [class_ "bg-white border-gray-200 dark:bg-gray-900 fixed w-full"] $ do
   div_ [class_ "max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"] $ do
     div_ [class_ "hidden w-full md:block md:w-auto", id_ "navbar-default"] $ do
       ul_ [class_ "font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 dark:border-gray-700"] $ do
-        li_ $ a_ [href_ "/queue", class_ "block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] "Queue"
-        li_ $ a_ [href_ "/browse", class_ "block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] "Browse"
-        li_ $ a_ [href_ "/settings", class_ "block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] "Settings"
+        li_ $ a_ [href_ "/queue", class_ ((if current_page == Queue then " text-yellow-500 " else " text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0 hover:text-blue-200")] "Queue"
+        li_ $ a_ [href_ "/browse", class_ ((if current_page == Browse then " text-yellow-500 " else " text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0 hover:text-blue-200")] "Browse"
+        li_ $ a_ [href_ "/settings", class_ ((if current_page == Settings then " text-yellow-500 " else " text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0 hover:text-blue-200")] "Settings"
     div_ [class_ "flex space-x-4"] $ do
-      button_ [id_ "navPrevious", class_ "block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
-      button_ [id_ "navStop", class_ "block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
-      button_ [id_ "navPlayPause", class_ "block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] "" -- $ i_  [data_ "feather" "play"] ""
-      button_ [id_ "navNext", class_ "block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
+      button_ [id_ "navPrevious", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
+      button_ [id_ "navStop", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
+      button_ [id_ "navPlayPause", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] "" -- $ i_  [data_ "feather" "play"] ""
+      button_ [id_ "navNext", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
       div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"]
 
 footer :: Html ()
@@ -73,7 +74,7 @@ footer = div_ [class_ "bg-white border-gray-200 dark:bg-slate-600 fixed bottom-0
 queuePage :: Int -> Handler (Html ())
 queuePage port = do
   playlist <- liftIO $ MPD.withMPD $ MPD.playlistInfo Nothing
-  page port $ do
+  page port Queue $ do
     p_ [class_ "text-2xl"] "Queue"
     case playlist of
       Left _ -> p_ "playlist error"
@@ -96,7 +97,7 @@ queuePage port = do
 browsePage :: Int -> Maybe String -> Handler (Html ())
 browsePage port query_path = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.lsInfo $ maybe "" (fromString . id) query_path
-  page port $ do
+  page port Browse $ do
     p_ [class_ "text-2xl"] "Browse"
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
@@ -142,7 +143,7 @@ settingsPage :: Int -> Handler (Html ())
 settingsPage port = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.config
   mpdStatus <- liftIO $ MPD.withMPD $ MPD.status
-  page port $ do
+  page port Settings $ do
     p_ [class_ "text-2xl"] "Settings"
     div_ [class_ "bg-gray-200 mt-4 p-4"] $ toHtml $ show mpdStatus
     div_ [class_ "bg-blue-200 mt-4 w-full"] $ toHtml $ show mpdResult
