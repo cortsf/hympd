@@ -56,7 +56,7 @@ parseCommandValue = do
              P.try (P.string "addPath") P.<|>
              P.try (P.string "seekCur")
   P.char ','
-  value <- P.many1 $ P.noneOf ","
+  value <- P.many1 $ P.anyChar
   P.eof
   case command of
     "volume" -> pure $ Volume $ read value
