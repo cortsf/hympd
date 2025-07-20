@@ -52,16 +52,16 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        document.querySelector('#navVolume').value=stVolume 
                                      };
 
-                                     function setCurrentSong (stSongID, stState) { 
-                                       if(stState == "Stopped"){
-                                         document.querySelector('#currentSong').innerHTML='..';
-                                       } else {
-                                         document.querySelector('#currentSong').innerHTML=document.querySelector("div.songId[data-songId='"+stSongID+"']").innerHTML;
-                                       };
+                                     function setSongTitleOnFooter (stSongID, stState) { 
+                                       console.log('setSongTitleOnFooter only works on queue. ' + stSongID + '_' + stState)
+                                       //if(stState == "Stopped"){
+                                       //  document.querySelector('#currentSong').innerHTML='..';
+                                       //} else {
+                                       //  document.querySelector('#currentSong').innerHTML=document.querySelector("div.songId[data-songId='"+stSongID+"']").innerHTML;
+                                       //};
                                      };
 
                                      function setPlaybackState (stState) { 
-                                     //alert(stState)
                                        if(stState == "Playing"){
                                          document.querySelector('#navPlayPause').innerHTML = '<i data-feather="pause"></i>'; 
                                        } else{
@@ -84,7 +84,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        var status = JSON.parse(event.data);
                                        console.log('new_message: ' + JSON.stringify(status));
                                        setVolume(status.stVolume);
-                                       setCurrentSong(status.stSongID, status.stState);
+                                       setSongTitleOnFooter(status.stSongID, status.stState);
                                        setPlaybackState(status.stState);
                                        setProgress(status.stTime, status.stState)
                                      };

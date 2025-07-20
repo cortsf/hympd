@@ -1,6 +1,9 @@
 module Utility where
 import qualified Network.MPD as MPD
 
+data SongList = SongList { songId :: Int, songName :: String } deriving Generic
+instance A.ToJSON SongList
+
 unId :: MPD.Id -> Int
 unId (MPD.Id n) = n
 

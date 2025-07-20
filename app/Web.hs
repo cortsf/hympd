@@ -26,9 +26,6 @@ import qualified System.FilePath.Posix as FP
 ------------------------------------------------------------
 -- Common
 ------------------------------------------------------------
--- data SongList = SongList { songId :: Int, songName :: String } deriving Generic
--- instance A.ToJSON SongList
-
 page :: Html () -> Handler (Html ())
 page content = do
   pure $ html_ $ do
@@ -37,7 +34,7 @@ page content = do
       script_ [src_ "static/styles.css"] ("" :: String)
       script_ [src_ "static/icons.js"] ("" :: String)
       link_ [rel_ "shortcut icon", href_ "data:,"]
-    body_ [class_ "overflow-y-scroll flex flex-col h-screen bg-blue-100"] $ do
+    body_ [class_ "overflow-y-scroll flex flex-col h-screen bg-blue-100 focus:outline-none"] $ do
       nav
       div_ [class_ "max-w-screen-xl w-full flex flex-wrap flex-col flex-grow mx-auto p-4 pt-18 pb-20 bg-white"] $ do
         content
@@ -58,7 +55,7 @@ nav = nav_ [class_ "bg-white border-gray-200 dark:bg-gray-900 fixed w-full"] $ d
     div_ [class_ "flex space-x-4"] $ do
       button_ [id_ "navPrevious", class_ "block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
       button_ [id_ "navStop", class_ "block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
-      button_ [id_ "navPlayPause", class_ "block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ ""
+      button_ [id_ "navPlayPause", class_ "block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] "" -- $ i_  [data_ "feather" "play"] ""
       button_ [id_ "navNext", class_ "block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
       div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"]
 
@@ -113,7 +110,7 @@ browsePage query_path = do
                              MPD.LsSong song -> do
                                mkItemIcon "music"
                                td_ [class_ "pl-4 py-2 overflow-hidden grow flex place-content-between"] $ do
-                                 div_ $ toHtml $ maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> maybe "No title metadata msg2" (FP.takeFileName . MPD.toString) (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags song))
+                                 div_ $ toHtml $ maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> maybe "No title metadata" (FP.takeFileName . MPD.toString) (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags song))
                                  div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
                                mkQueueButtons(T.pack $ MPD.toString $ MPD.sgFilePath song)
                              MPD.LsPlaylist playlist -> do 

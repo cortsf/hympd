@@ -32,20 +32,22 @@ data Msg = Toggle
   deriving Show
 
 parseMsg :: String -> Either P.ParseError Msg
-parseMsg = P.parse (P.try parseCommandValue P.<|> P.try parseCommand) "(unknown)"
+parseMsg = P.parse (parseCommand P.<|> parseCommandValue) "(unknown)"
 
 parseCommand :: P.Parser Msg
 parseCommand = do
   command <- P.try (P.string "toggle") P.<|> 
              P.try (P.string "stop") P.<|> 
              P.try (P.string "previous") P.<|> 
-             P.try (P.string "next")
+             P.try (P.string "next") P.<|>
+             P.try (P.string "status")
   P.eof
   case command of
     "toggle" -> pure $ Toggle
     "stop" -> pure $ Stop
     "previous" -> pure $ Previous
     "next" -> pure $ Next
+    "status" -> pure $ Status
 
 parseCommandValue :: P.Parser Msg
 parseCommandValue = do
