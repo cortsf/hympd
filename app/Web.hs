@@ -82,7 +82,7 @@ queuePage port = do
                           tr_ [class_ "my-0 odd:bg-slate-50 even:bg-white hover:bg-sky-100 flex place-content-between"] $ do
                            td_ [class_ "text-gray-500 flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
                            td_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)),  class_ "py-2 flex place-content-between flex-grow hover:text-sky-600"] $ do
-                             div_ ([class_ "text-ellipsis songId"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ toHtml $ 
+                             div_ ([class_ "text-ellipsis song-item"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ toHtml $ 
                                maybe
                                (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song)
                                (\x -> maybe "No title metadata" MPD.toString (listToMaybe x))

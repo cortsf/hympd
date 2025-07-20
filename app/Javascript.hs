@@ -62,13 +62,13 @@ jsblock port = T.show $ renderJs $ [jmacro|
                                      };
 
                                      function highlightCurrentSongOnQueue (stSongID, stState) { 
+                                       var current_class = 'text-sky-600';
                                        if ( window.location.pathname == "/queue" ){
-                                         console.log('on queue!! ' + stSongID + '_' + stState)
                                          if(stState == "Stopped"){
-                                           document.querySelector("div.songId.font-semibold").parentNode.classList.remove('font-semibold');
+                                           document.querySelectorAll("div.song-item").forEach(function(x){x.parentNode.classList.remove(current_class)});
                                          } else {
-                                           document.querySelectorAll(".font-semibold").forEach(function(x){x.classList.remove('font-semibold');console.log('hi!!')});
-                                           document.querySelector("div.songId[data-songId='"+stSongID+"']").parentNode.classList.add('font-semibold');
+                                           document.querySelectorAll("div.song-item").forEach(function(x){x.parentNode.classList.remove(current_class)});
+                                           document.querySelector("div.song-item[data-songId='"+stSongID+"']").parentNode.classList.add(current_class);
                                          };
                                        };
                                      };
