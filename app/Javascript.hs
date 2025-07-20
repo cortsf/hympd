@@ -3,8 +3,8 @@ module Javascript where
 import Language.Javascript.JMacro
 import Data.Text as T
 
-jsblock :: Int -> T.Text
-jsblock port = T.show $ renderJs $ [jmacro| 
+jsblock :: T.Text
+jsblock = T.show $ renderJs $ [jmacro| 
                                      var refreshIntervalId;
                                      var currentTime = 0.0;
 
@@ -83,7 +83,7 @@ jsblock port = T.show $ renderJs $ [jmacro|
                                      };
 
                                      //// SOCKET ////
-                                     socket = new WebSocket("ws://localhost:" + `port` + "/websocket");
+                                     socket = new WebSocket("ws://" + window.location.host + "/websocket");
                                      socket.onopen = function() {
                                        document.querySelector('#navPrevious').addEventListener('click', function() {socket.send('previous')}, false);
                                        document.querySelector('#navStop').addEventListener('click', function (){socket.send('stop')}, false);

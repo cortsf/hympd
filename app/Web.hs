@@ -29,8 +29,8 @@ import qualified System.FilePath.Posix as FP
 
 data Page = Queue | Browse | Settings deriving Eq
 
-page :: Int -> Page -> Html () -> Handler (Html ())
-page port current_page content = do
+page :: Page -> Html () -> Handler (Html ())
+page current_page content = do
   pure $ html_ $ do
     head_ $ do
       title_ "Hympd"
@@ -43,7 +43,7 @@ page port current_page content = do
         content
       footer
       script_ $ "feather.replace();"
-      script_ $ jsblock port
+      script_ $ jsblock
 
 nav :: Page -> Html ()
 nav current_page = nav_ [class_ "bg-white border-gray-200 dark:bg-gray-900 fixed w-full"] $ do
@@ -71,16 +71,16 @@ footer = div_ [class_ "bg-white border-gray-200 dark:bg-slate-600 fixed bottom-0
 ------------------------------------------------------------
 -- Individual Pages
 ------------------------------------------------------------
-queuePage :: Int -> Handler (Html ())
-queuePage port = do
+queuePage :: Handler (Html ())
+queuePage = do
   playlist <- liftIO $ MPD.withMPD $ MPD.playlistInfo Nothing
-  page port Queue $ do
+  page Queue $ do
     p_ [class_ "text-2xl"] "Queue"
     case playlist of
       Left _ -> p_ "playlist error"
       Right pl -> table_ [class_ "table-auto w-full mt-4"] $ do
         tbody_ $ mapM_ (\song ->
-                          tr_ [class_ "my-0 odd:bg-slate-50 even:bg-white hover:bg-sky-100 flex place-content-between"] $ do
+                          tr_ [class_ "my-0 odd:bg-slate-50 even:bg-white hover:bg-sky-100 flex place-content-between px-2"] $ do
                            td_ [class_ "text-gray-500 flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
                            td_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)),  class_ "py-2 flex place-content-between flex-grow hover:text-sky-600"] $ do
                              div_ ([class_ "text-ellipsis song-item"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ toHtml $ 
@@ -89,20 +89,20 @@ queuePage port = do
                                (\x -> maybe "No title metadata" MPD.toString (listToMaybe x))
                                (C.lookup MPD.Title (MPD.sgTags song))
                              div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
-                           td_ [class_ "flex gap-x-2 pr-2"] $ do
+                           td_ [class_ "flex gap-x-2"] $ do
                              button_ [onclick_ $ "location.href='/browse?path=" <> (MPD.toText $ MPD.sgFilePath song) <> "'", class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "search"] ""
                              button_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('deleteId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "trash-2"] ""
                        ) pl
 
-browsePage :: Int -> Maybe String -> Handler (Html ())
-browsePage port query_path = do
+browsePage :: Maybe String -> Handler (Html ())
+browsePage query_path = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.lsInfo $ maybe "" (fromString . id) query_path
-  page port Browse $ do
+  page Browse $ do
     p_ [class_ "text-2xl"] "Browse"
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
       Right res -> table_ [class_ "table-auto w-full mt-4"] $ do
-        tbody_ $ mapM_ (\item -> tr_ [class_ "my-0 odd:bg-slate-50 even:bg-white hover:bg-sky-100 flex place-content-between"] $ do
+        tbody_ $ mapM_ (\item -> tr_ [class_ "my-0 odd:bg-slate-50 even:bg-white hover:bg-sky-100 flex place-content-between px-2"] $ do
                            case item of
                              MPD.LsDirectory path -> do
                                mkItemIcon "folder"
@@ -135,15 +135,15 @@ browsePage port query_path = do
     mkItemIcon :: T.Text -> Html ()
     mkItemIcon icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
-    mkQueueButtons path = td_ [class_ "py-2 text-cyan-600 flex gap-x-2 pr-2"] $ do 
+    mkQueueButtons path = td_ [class_ "py-2 text-cyan-600 flex gap-x-2"] $ do 
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "hover:text-cyan-200"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
       button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "hover:text-cyan-200"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
 
-settingsPage :: Int -> Handler (Html ())
-settingsPage port = do
+settingsPage :: Handler (Html ())
+settingsPage = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.config
   mpdStatus <- liftIO $ MPD.withMPD $ MPD.status
-  page port Settings $ do
+  page Settings $ do
     p_ [class_ "text-2xl"] "Settings"
     div_ [class_ "bg-gray-200 mt-4 p-4"] $ toHtml $ show mpdStatus
     div_ [class_ "bg-blue-200 mt-4 w-full"] $ toHtml $ show mpdResult
