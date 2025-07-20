@@ -84,7 +84,7 @@ queuePage = do
       Left _ -> p_ "playlist error"
       Right pl -> table_ [class_ "table-auto w-full mt-4"] $ do
         tbody_ $ mapM_ (\song ->
-                          tr_ [class_ "my-0 odd:bg-white even:bg-slate-50 hover:bg-sky-100 flex place-content-between"] $ do
+                          tr_ [class_ "my-0 odd:bg-slate-50 even:bg-white hover:bg-sky-100 flex place-content-between"] $ do
                            td_ [class_ "text-gray-500 flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
                            td_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)),  class_ "py-2 flex place-content-between flex-grow hover:text-sky-600"] $ do
                              -- div_ ([class_ "text-ellipsis"] <> (maybe [] (\songId -> [(data_ . "song-id" songId)] MPD.stSongID song))) $ toHtml $ 
@@ -107,7 +107,7 @@ browsePage query_path = do
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
       Right res -> table_ [class_ "table-auto w-full mt-4"] $ do
-        tbody_ $ mapM_ (\item -> tr_ [class_ "my-0 odd:bg-white even:bg-slate-50 hover:bg-sky-100 flex place-content-between"] $ do
+        tbody_ $ mapM_ (\item -> tr_ [class_ "my-0 odd:bg-slate-50 even:bg-white hover:bg-sky-100 flex place-content-between"] $ do
                            case item of
                              MPD.LsDirectory path -> do
                                mkItemIcon "folder"
