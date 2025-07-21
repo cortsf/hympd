@@ -8,7 +8,7 @@ import Utility
 import Data.Aeson qualified as A
 import Data.Aeson.Text qualified as A
 import Control.Monad.IO.Class
-import Data.Maybe (listToMaybe, maybeToList, fromMaybe)
+import Data.Maybe (listToMaybe, maybeToList, fromMaybe, isJust)
 import Data.Time.Clock.POSIX
 import Data.String(fromString)
 import Data.Time.Format
@@ -56,7 +56,7 @@ nav current_page = nav_ [class_ "bg-white border-gray-200 dark:bg-gray-900 fixed
     div_ [class_ "flex space-x-4"] $ do
       button_ [id_ "navPrevious", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
       button_ [id_ "navStop", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
-      button_ [id_ "navPlayPause", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] "" -- $ i_  [data_ "feather" "play"] ""
+      button_ [id_ "navPlayPause", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_  [data_ "feather" "play"] ""
       button_ [id_ "navNext", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
       div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"]
 
@@ -90,7 +90,7 @@ queuePage = do
                                (C.lookup MPD.Title (MPD.sgTags song))
                              div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
                            td_ [class_ "flex gap-x-2"] $ do
-                             button_ [onclick_ $ "location.href='/browse?path=" <> (MPD.toText $ MPD.sgFilePath song) <> "'", class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "search"] ""
+                             button_ [onclick_ $ "location.href='/browse?path=" <> (T.pack $ FP.takeDirectory $ MPD.toString $  MPD.sgFilePath song) <> "'", class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "search"] ""
                              button_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('deleteId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "trash-2"] ""
                        ) pl
 
@@ -99,10 +99,11 @@ browsePage query_path = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.lsInfo $ maybe "" (fromString . id) query_path
   page Browse $ do
     div_ [class_ "flex place-content-between"] $ do
-      div_ [class_ "text-2xl"] $ "Browse"
-      div_ [class_ "flex gap-x-2"] $ do
-       button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "bg-cyan-600 px-2 rounded-md text-white hover:bg-cyan-800 hover:cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
-       button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "bg-cyan-600 px-2 rounded-md text-white hover:bg-cyan-800 hover:cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
+      div_ [class_ "text-2xl"] "Browse"
+      if (isJust query_path) then div_ [class_ "flex gap-x-2"] $ do
+        button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "bg-cyan-600 px-2 rounded-md text-white hover:bg-cyan-800 hover:cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
+        button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "bg-cyan-600 px-2 rounded-md text-white hover:bg-cyan-800 hover:cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
+        else  div_ ""
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
       Right res -> table_ [class_ "table-auto w-full mt-4"] $ do
@@ -116,7 +117,7 @@ browsePage query_path = do
                                mkItemIcon "music"
                                td_ [class_ "pl-4 py-2 overflow-hidden grow flex place-content-between"] $ do
                                  div_ $ toHtml $ maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> maybe "No title metadata" (FP.takeFileName . MPD.toString) (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags song))
-                                 div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
+                                 div_ [class_ "px-4"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
                                mkQueueButtons(T.pack $ MPD.toString $ MPD.sgFilePath song)
                              MPD.LsPlaylist playlist -> do 
                                mkItemIcon "list"
@@ -139,7 +140,7 @@ browsePage query_path = do
     mkItemIcon :: T.Text -> Html ()
     mkItemIcon icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
-    mkQueueButtons path = td_ [class_ "py-2 text-cyan-600 flex gap-x-2"] $ do 
+    mkQueueButtons path = td_ [class_ "py-2 text-cyan-600 flex gap-x-4"] $ do 
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "hover:text-cyan-900 hover:cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
       button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "hover:text-cyan-900 hover:cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
 
