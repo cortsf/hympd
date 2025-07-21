@@ -50,9 +50,9 @@ nav current_page = nav_ [class_ "bg-white border-gray-200 dark:bg-gray-900 fixed
   div_ [class_ "max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"] $ do
     div_ [class_ "hidden w-full md:block md:w-auto", id_ "navbar-default"] $ do
       ul_ [class_ "font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 dark:border-gray-700"] $ do
-        li_ $ a_ [href_ "/queue", class_ ((if current_page == Queue then " text-yellow-500 " else " text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0 hover:text-blue-200")] "Queue"
-        li_ $ a_ [href_ "/browse", class_ ((if current_page == Browse then " text-yellow-500 " else " text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0 hover:text-blue-200")] "Browse"
-        li_ $ a_ [href_ "/settings", class_ ((if current_page == Settings then " text-yellow-500 " else " text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0 hover:text-blue-200")] "Settings"
+        li_ $ a_ [href_ "/queue", class_ ((if current_page == Queue then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Queue"
+        li_ $ a_ [href_ "/browse", class_ ((if current_page == Browse then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Browse"
+        li_ $ a_ [href_ "/settings", class_ ((if current_page == Settings then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Settings"
     div_ [class_ "flex space-x-4"] $ do
       button_ [id_ "navPrevious", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
       button_ [id_ "navStop", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
@@ -98,7 +98,11 @@ browsePage :: Maybe String -> Handler (Html ())
 browsePage query_path = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.lsInfo $ maybe "" (fromString . id) query_path
   page Browse $ do
-    p_ [class_ "text-2xl"] "Browse"
+    div_ [class_ "flex place-content-between"] $ do
+      div_ [class_ "text-2xl"] $ "Browse"
+      div_ [class_ "flex gap-x-2"] $ do
+       button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "bg-cyan-600 px-2 rounded-md text-white hover:bg-cyan-800 hover:cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
+       button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "bg-cyan-600 px-2 rounded-md text-white hover:bg-cyan-800 hover:cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
       Right res -> table_ [class_ "table-auto w-full mt-4"] $ do
@@ -136,8 +140,8 @@ browsePage query_path = do
     mkItemIcon icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
     mkQueueButtons path = td_ [class_ "py-2 text-cyan-600 flex gap-x-2"] $ do 
-      button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "hover:text-cyan-200"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
-      button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "hover:text-cyan-200"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
+      button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "hover:text-cyan-900 hover:cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
+      button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "hover:text-cyan-900 hover:cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
 
 settingsPage :: Handler (Html ())
 settingsPage = do
