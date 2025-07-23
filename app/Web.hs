@@ -161,6 +161,6 @@ settingsPage = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.config
   mpdStatus <- liftIO $ MPD.withMPD $ MPD.status
   page Settings $ do
-    p_ [class_ "text-2xl"] "Settings"
+    p_ [class_ "text-2xl ml-10"] "Settings"
     div_ [class_ "bg-gray-200 mt-4 p-4"] $ toHtml $ show mpdStatus
     div_ [class_ "bg-blue-200 mt-4 w-full"] $ toHtml $ show mpdResult
