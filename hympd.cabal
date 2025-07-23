@@ -1,5 +1,5 @@
 cabal-version:      3.4
-name:               hmpd
+name:               hympd
 version:            0.1.0.0
 -- synopsis:
 -- description:
@@ -16,7 +16,7 @@ extra-doc-files:    CHANGELOG.md
 common warnings
     ghc-options: -Wall
 
-executable hmpd
+executable hympd
     import:           warnings
     main-is:          Main.hs
     other-modules:    Javascript

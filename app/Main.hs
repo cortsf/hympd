@@ -30,7 +30,7 @@ data Config = Config
   deriving (Show)
 
 parseArgs :: IO Config
-parseArgs = execParser $ info confParser (progDesc "Hmpd MPD client")
+parseArgs = execParser $ info confParser (progDesc "Hympd: MPD web client")
 
 confParser :: Parser Config
 confParser = do
