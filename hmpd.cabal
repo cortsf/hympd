@@ -1,0 +1,46 @@
+cabal-version:      3.4
+name:               hmpd
+version:            0.1.0.0
+-- synopsis:
+-- description:
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             Franco Cortesi
+maintainer:         cortesifranco3@gmail.com
+-- copyright:
+category:           Web
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+-- extra-source-files:
+
+common warnings
+    ghc-options: -Wall
+
+executable hmpd
+    import:           warnings
+    main-is:          Main.hs
+    other-modules:    Javascript
+                    , Web
+                    , Stream
+    -- other-extensions:
+    build-depends:    base ^>=4.20
+                    , servant
+                    , servant-server
+                    , servant-websockets
+                    , servant-lucid
+                    , warp
+                    , wai
+                    , conduit
+                    , websockets
+                    , lucid
+                    , libmpd
+                    , optparse-applicative
+                    , text
+                    , aeson
+                    , jmacro
+                    , filepath
+                    , containers
+                    , parsec
+                    , time
+    hs-source-dirs:   app
+    default-language: GHC2024
