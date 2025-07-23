@@ -23,6 +23,7 @@ data Msg = Toggle
   | Next 
   | Previous 
   | Status 
+  | Clear
   | Volume Int 
   | PlayId Int 
   | DeleteId Int 
@@ -40,7 +41,8 @@ parseCommand = do
              P.try (P.string "stop") P.<|> 
              P.try (P.string "previous") P.<|> 
              P.try (P.string "next") P.<|>
-             P.try (P.string "status")
+             P.try (P.string "status") P.<|>
+             P.try (P.string "clear")
   P.eof
   case command of
     "toggle" -> pure $ Toggle
@@ -48,6 +50,7 @@ parseCommand = do
     "previous" -> pure $ Previous
     "next" -> pure $ Next
     "status" -> pure $ Status
+    "clear" -> pure $ Clear
 
 parseCommandValue :: P.Parser Msg
 parseCommandValue = do
@@ -88,6 +91,7 @@ streamData pc = do
         (Right Next, Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.next) >> sendStatus js_request_status conn
         (Right Previous, Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.previous) >> sendStatus js_request_status conn
         (Right Status, Right _js_request_status_nowrap) -> sendStatus js_request_status conn
+        (Right Clear, Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.clear) >> sendStatus js_request_status conn
         (Right (Volume v), Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.setVolume (fromIntegral v)) >> sendStatus js_request_status conn
         (Right (PlayId v), Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.playId (MPD.Id v)) >> sendStatus js_request_status conn
         (Right (DeleteId v), Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.deleteId (MPD.Id v)) >> sendStatus js_request_status conn

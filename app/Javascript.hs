@@ -62,13 +62,13 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      };
 
                                      function highlightCurrentSongOnQueue (stSongID, stState) { 
-                                       var current_class = 'text-sky-600';
+                                       var current_class = 'text-blue-400';
                                        if ( window.location.pathname == "/queue" ){
                                          if(stState == "Stopped"){
-                                           document.querySelectorAll("div.song-item").forEach(function(x){x.parentNode.classList.remove(current_class)});
+                                           document.querySelector(".song-item").classList.remove(current_class);
                                          } else {
-                                           document.querySelectorAll("div.song-item").forEach(function(x){x.parentNode.classList.remove(current_class)});
-                                           document.querySelector("div.song-item[data-songId='"+stSongID+"']").parentNode.classList.add(current_class);
+                                           document.querySelectorAll(".song-item").forEach(function(x){x.classList.remove(current_class)});
+                                           document.querySelector("div[data-songId='"+stSongID+"']").parentNode.classList.add(current_class);
                                          };
                                        };
                                      };
@@ -82,7 +82,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        feather.replace(); 
                                      };
 
-                                     //// SOCKET ////
+                                     // SOCKET ////
                                      socket = new WebSocket("ws://" + window.location.host + "/websocket");
                                      socket.onopen = function() {
                                        document.querySelector('#navPrevious').addEventListener('click', function() {socket.send('previous')}, false);

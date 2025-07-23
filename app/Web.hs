@@ -12,7 +12,7 @@ import Data.Maybe (listToMaybe, maybeToList, fromMaybe, isJust)
 import Data.Time.Clock.POSIX
 import Data.String(fromString)
 import Data.Time.Format
-import Data.List (sortBy)
+import Data.List (sortBy, intersperse)
 import Data.Coerce (coerce)
 import Lucid
 import Servant (Handler)
@@ -33,32 +33,32 @@ page :: Page -> Html () -> Handler (Html ())
 page current_page content = do
   pure $ html_ $ do
     head_ $ do
-      title_ "Hympd"
+      title_ "Hmpd"
       script_ [src_ "static/styles.css"] ("" :: String)
       script_ [src_ "static/icons.js"] ("" :: String)
       link_ [rel_ "shortcut icon", href_ "data:,"]
     body_ [class_ "overflow-y-scroll flex flex-col h-screen bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400"] $ do
       nav current_page
-      div_ [id_ "content", class_ "max-w-screen-xl w-full flex flex-wrap flex-col flex-grow mx-auto pt-18 pb-20 bg-white dark:bg-slate-800"] $ do
+      div_ [id_ "content", class_ "max-w-screen-xl w-full flex flex-wrap flex-col flex-grow mx-auto pt-18 pb-20 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-stone-200 [&_tr]:dark:hover:text-blue-500"] $ do
         content
       footer
       script_ $ "feather.replace();"
       script_ $ jsblock
 
 nav :: Page -> Html ()
-nav current_page = nav_ [class_ "bg-gray-900 dark:bg-gray-700 fixed w-full dark:text-blue-200  [&_.navItem]:dark:hover:text-yellow-600 "] $ do
+nav current_page = nav_ [class_ "bg-gray-900 dark:bg-slate-700 fixed w-full dark:text-blue-200  [&_.navItem]:dark:hover:text-yellow-600 border-none"] $ do
   div_ [class_ "max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"] $ do
     div_ [class_ "hidden w-full md:block md:w-auto", id_ "navbar-default"] $ do
       ul_ [class_ "font-medium flex flex-row space-x-8"] $ do
-        li_ $ a_ [href_ "/queue", class_ ((if current_page == Queue then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Queue"
-        li_ $ a_ [href_ "/browse", class_ ((if current_page == Browse then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Browse"
-        li_ $ a_ [href_ "/settings", class_ ((if current_page == Settings then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Settings"
+        li_ $ a_ [href_ "/queue", classes_ [if current_page == Queue then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Queue"
+        li_ $ a_ [href_ "/browse", classes_ [if current_page == Browse then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Browse"
+        li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Settings"
     div_ [class_ "flex space-x-4 "] $ do
-      button_ [id_ "navPrevious", class_ "navItem hover:cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
-      button_ [id_ "navStop", class_ "navItem hover:cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
-      button_ [id_ "navPlayPause", class_ "navItem hover:cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_  [data_ "feather" "play"] ""
-      button_ [id_ "navNext", class_ "navItem hover:cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
-      div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"]
+      button_ [id_ "navPrevious", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
+      button_ [id_ "navStop", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
+      button_ [id_ "navPlayPause", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_  [data_ "feather" "play"] ""
+      button_ [id_ "navNext", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
+      div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-blue-200"]
 
 footer :: Html ()
 footer = div_ [class_ "bg-slate-600 dark:bg-slate-600 fixed bottom-0 w-full py-4"] $ do
@@ -71,47 +71,56 @@ footer = div_ [class_ "bg-slate-600 dark:bg-slate-600 fixed bottom-0 w-full py-4
 ------------------------------------------------------------
 -- Individual Pages
 ------------------------------------------------------------
+
 queuePage :: Handler (Html ())
 queuePage = do
   playlist <- liftIO $ MPD.withMPD $ MPD.playlistInfo Nothing
   page Queue $ do
-    p_ [class_ "text-2xl"] "Queue"
+    div_ [class_ "flex place-content-between ml-10 mr-2 [&_button]:dark:bg-blue-400 [&_button]:dark:hover:bg-blue-300"] $ do
+      span_ [class_ "text-2xl"] $ "Queue"
+      button_ [onclick_ "socket.send('clear')", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Clear")
     case playlist of
       Left _ -> p_ "playlist error"
+      Right [] -> div_ [class_ "px-10 mt-4 text-rose-400"] $ p_ "-Empty queue-"
       Right pl -> table_ [class_ "table-auto w-full mt-4"] $ do
         tbody_ $ mapM_ (\song ->
-                          tr_ [class_ "odd:bg-slate-50 odd:dark:bg-slate-400 even:bg-white even:dark:bg-slate-500 hover:bg-sky-100 flex place-content-between px-2 my-0"] $ do
-                           td_ [class_ "text-gray-300 flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
-                           td_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)),  class_ "py-2 flex place-content-between flex-grow hover:text-sky-600"] $ do
-                             div_ ([class_ "text-ellipsis song-item"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ toHtml $ 
+                          tr_ [class_ "flex place-content-between px-2 my-0"] $ do
+                           td_ [class_ "flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
+                           td_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)),  class_ "py-2 flex place-content-between flex-grow cursor-pointer song-item"] $ do
+                             div_ ([class_ "text-ellipsis "] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ toHtml $ 
                                maybe
                                (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song)
                                (\x -> maybe "No title metadata" MPD.toString (listToMaybe x))
                                (C.lookup MPD.Title (MPD.sgTags song))
                              div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
                            td_ [class_ "flex gap-x-2"] $ do
-                             button_ [onclick_ $ "location.href='/browse?path=" <> (T.pack $ FP.takeDirectory $ MPD.toString $  MPD.sgFilePath song) <> "'", class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 dark:text-rose-300 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "search"] ""
-                             button_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('deleteId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 dark:text-rose-300 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "trash-2"] ""
+                             button_ [onclick_ $ "location.href='/browse?path=" <> (T.pack $ FP.takeDirectory $ MPD.toString $  MPD.sgFilePath song) <> "'", class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 dark:text-rose-300 cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "search"] ""
+                             button_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('deleteId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 dark:text-rose-300 cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "trash-2"] ""
                        ) pl
+
+
 
 browsePage :: Maybe String -> Handler (Html ())
 browsePage query_path = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.lsInfo $ maybe "" (fromString . id) query_path
   page Browse $ do
-    div_ [class_ "flex place-content-between"] $ do
-      div_ [class_ "text-2xl ml-10"] "Browse"
-      if (isJust query_path) then div_ [class_ "flex gap-x-2"] $ do
-        button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "bg-cyan-600 px-2 rounded-md text-white hover:bg-cyan-800 hover:cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
-        button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "bg-cyan-600 px-2 rounded-md text-white hover:bg-cyan-800 hover:cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
+    div_ [class_ "flex place-content-between ml-10 mr-2"] $ do
+      div_ [class_ "place-content-start"] $ do
+        span_ [class_ "text-2xl"] $ "Browse"
+        -- mapM_ (\dir -> p_ [class_ "text-xs"] $ a_ [href_ $ "/browse?path=" <> T.pack dir] $ toHtml dir) (FP.splitDirectories $ maybe "" (fromString . id) query_path)
+        mapM_ (\(path, dir) -> p_ [class_ "text-xs"] $ a_ [class_ "hover:text-blue-300", href_ $ "/browse?path=" <> T.pack path] $ toHtml dir) $ zip (FP.splitDirectories $ maybe "" (fromString . id) query_path) (FP.splitDirectories $ maybe "" (fromString . id) query_path)
+      if (isJust query_path) then div_ [class_ "flex gap-x-2 [&_button]:dark:bg-blue-400 [&_button]:dark:hover:bg-blue-300 items-end"] $ do
+        button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
+        button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
         else  div_ ""
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
       Right res -> table_ [class_ "table-auto w-full mt-4"] $ do
-        tbody_ $ mapM_ (\item -> tr_ [id_ "table_browse", class_ "odd:bg-slate-50 odd:dark:bg-slate-700 even:bg-white even:dark:bg-slate-800 hover:bg-sky-100 flex place-content-between px-2 my-0"] $ do
+        tbody_ $ mapM_ (\item -> tr_ [id_ "table_browse", class_ "hover:bg-sky-100 flex place-content-between px-2 my-0"] $ do
                            case item of
                              MPD.LsDirectory path -> do
                                mkItemIcon "folder"
-                               td_ [class_ "pl-4 py-2 overflow-hidden grow hover:cursor-pointer", onclick_ $ "location.href='" <> (("/browse?path=" :: T.Text) <> (MPD.toText path)) <> "'"] $ toHtml $ fromMaybe "__" ((FP.splitDirectories $ MPD.toString path) !!? (( length $ FP.splitDirectories $ MPD.toString path ) - 1))
+                               td_ [class_ "pl-4 py-2 overflow-hidden grow cursor-pointer", onclick_ $ "location.href='" <> (("/browse?path=" :: T.Text) <> (MPD.toText path)) <> "'"] $ toHtml $ fromMaybe "__" ((FP.splitDirectories $ MPD.toString path) !!? (( length $ FP.splitDirectories $ MPD.toString path ) - 1))
                                mkQueueButtons(T.pack $ MPD.toString path)
                              MPD.LsSong song -> do
                                mkItemIcon "music"
@@ -140,9 +149,14 @@ browsePage query_path = do
     mkItemIcon :: T.Text -> Html ()
     mkItemIcon icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
-    mkQueueButtons path = td_ [class_ "py-2 text-cyan-600 flex gap-x-4"] $ do 
-      button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "hover:text-cyan-900 hover:cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
-      button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "hover:text-cyan-900 hover:cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
+    mkQueueButtons path = td_ [class_ "py-2 dark:text-blue-400 flex gap-x-4"] $ do 
+      button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "hover:text-cyan-900 cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
+      button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "hover:text-cyan-900 cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
+-- parentDirs :: FilePath -> [(T.Text, T.Text)]
+-- parentDirs path = (\(fst, snd) -> foldr ()  tail_path)
+--   let currentPath = FP.joinPath [path]
+--   let parents = map (`FP.joinPath` []) $ filter (/= "") $ tail $ FP.splitDirectories currentPath
+--   return parents
 
 settingsPage :: Handler (Html ())
 settingsPage = do
