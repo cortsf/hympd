@@ -36,13 +36,7 @@ page current_page content = do
       title_ "Hympd"
       script_ [src_ "static/styles.css"] ("" :: String)
       script_ [src_ "static/icons.js"] ("" :: String)
-      -- link_ [rel_ "shortcut icon", href_ "data:,"]
-      -- link_ [rel_ "icon", href_ "static/favicon.png", sizes_ "any", type_ "image/svg+xml"]
       link_ [rel_ "icon", href_ "static/favicon4.png", sizes_ "any", type_ "image/png"]
-      -- link_ [rel_ "apple-touch-icon", sizes_ "180x180", href_ "/apple-touch-icon.png"]
-      -- link_ [rel_ "icon", type_ "image/png", sizes_"32x32", href_ "/favicon-32x32.png"]
-      -- link_ [rel_ "icon", type_ "image/png", sizes_"16x16", href_ "/favicon-16x16.png"]
-      -- link_ [rel_ "manifest", href_ "/site.webmanifest"]
     body_ [class_ "overflow-y-scroll flex flex-col h-screen bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400"] $ do
       nav current_page
       div_ [id_ "content", class_ "max-w-screen-xl w-full flex flex-wrap flex-col flex-grow mx-auto pt-18 pb-20 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-stone-200 [&_tr]:dark:hover:text-blue-500"] $ do
