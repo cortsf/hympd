@@ -27,7 +27,7 @@
       in flake // {
         legacyPackages = pkgs;
 
-        packages = flake.packages // { default = flake.packages."hympd:exe:hympd"; };
+        packages = flake.packages // { default = flake.packages."hmpd:exe:hmpd"; };
       });
 
   nixConfig = {

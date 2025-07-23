@@ -37,31 +37,31 @@ page current_page content = do
       script_ [src_ "static/styles.css"] ("" :: String)
       script_ [src_ "static/icons.js"] ("" :: String)
       link_ [rel_ "shortcut icon", href_ "data:,"]
-    body_ [class_ "overflow-y-scroll flex flex-col h-screen bg-blue-100 focus:outline-none"] $ do
+    body_ [class_ "overflow-y-scroll flex flex-col h-screen bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400"] $ do
       nav current_page
-      div_ [class_ "max-w-screen-xl w-full flex flex-wrap flex-col flex-grow mx-auto p-4 pt-18 pb-20 bg-white"] $ do
+      div_ [id_ "content", class_ "max-w-screen-xl w-full flex flex-wrap flex-col flex-grow mx-auto pt-18 pb-20 bg-white dark:bg-slate-800"] $ do
         content
       footer
       script_ $ "feather.replace();"
       script_ $ jsblock
 
 nav :: Page -> Html ()
-nav current_page = nav_ [class_ "bg-white border-gray-200 dark:bg-gray-900 fixed w-full"] $ do
+nav current_page = nav_ [class_ "bg-gray-900 dark:bg-gray-700 fixed w-full dark:text-blue-200  [&_.navItem]:dark:hover:text-yellow-600 "] $ do
   div_ [class_ "max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"] $ do
     div_ [class_ "hidden w-full md:block md:w-auto", id_ "navbar-default"] $ do
-      ul_ [class_ "font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 dark:border-gray-700"] $ do
-        li_ $ a_ [href_ "/queue", class_ ((if current_page == Queue then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Queue"
-        li_ $ a_ [href_ "/browse", class_ ((if current_page == Browse then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Browse"
-        li_ $ a_ [href_ "/settings", class_ ((if current_page == Settings then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Settings"
-    div_ [class_ "flex space-x-4"] $ do
-      button_ [id_ "navPrevious", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
-      button_ [id_ "navStop", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
-      button_ [id_ "navPlayPause", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_  [data_ "feather" "play"] ""
-      button_ [id_ "navNext", class_ "hover:cursor-pointer block py-2 text-white bg-blue-200 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500 hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
+      ul_ [class_ "font-medium flex flex-row space-x-8"] $ do
+        li_ $ a_ [href_ "/queue", class_ ((if current_page == Queue then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Queue"
+        li_ $ a_ [href_ "/browse", class_ ((if current_page == Browse then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Browse"
+        li_ $ a_ [href_ "/settings", class_ ((if current_page == Settings then " text-yellow-500 " else " hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem ") <> "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0")] "Settings"
+    div_ [class_ "flex space-x-4 "] $ do
+      button_ [id_ "navPrevious", class_ "navItem hover:cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
+      button_ [id_ "navStop", class_ "navItem hover:cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
+      button_ [id_ "navPlayPause", class_ "navItem hover:cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_  [data_ "feather" "play"] ""
+      button_ [id_ "navNext", class_ "navItem hover:cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
       div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"]
 
 footer :: Html ()
-footer = div_ [class_ "bg-white border-gray-200 dark:bg-slate-600 fixed bottom-0 w-full py-4"] $ do
+footer = div_ [class_ "bg-slate-600 dark:bg-slate-600 fixed bottom-0 w-full py-4"] $ do
   div_ [class_ "max-w-screen-xl w-full mx-auto"] $ do 
     h1_ [id_ "currentSong", class_ "text-2xl text-blue-200"] $ ".."
   div_ [class_ "max-w-screen-xl flex items-center justify-between mx-auto"] $ do
@@ -80,8 +80,8 @@ queuePage = do
       Left _ -> p_ "playlist error"
       Right pl -> table_ [class_ "table-auto w-full mt-4"] $ do
         tbody_ $ mapM_ (\song ->
-                          tr_ [class_ "my-0 odd:bg-slate-50 even:bg-white hover:bg-sky-100 flex place-content-between px-2"] $ do
-                           td_ [class_ "text-gray-500 flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
+                          tr_ [class_ "odd:bg-slate-50 odd:dark:bg-slate-400 even:bg-white even:dark:bg-slate-500 hover:bg-sky-100 flex place-content-between px-2 my-0"] $ do
+                           td_ [class_ "text-gray-300 flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
                            td_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)),  class_ "py-2 flex place-content-between flex-grow hover:text-sky-600"] $ do
                              div_ ([class_ "text-ellipsis song-item"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ toHtml $ 
                                maybe
@@ -90,8 +90,8 @@ queuePage = do
                                (C.lookup MPD.Title (MPD.sgTags song))
                              div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
                            td_ [class_ "flex gap-x-2"] $ do
-                             button_ [onclick_ $ "location.href='/browse?path=" <> (T.pack $ FP.takeDirectory $ MPD.toString $  MPD.sgFilePath song) <> "'", class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "search"] ""
-                             button_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('deleteId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "trash-2"] ""
+                             button_ [onclick_ $ "location.href='/browse?path=" <> (T.pack $ FP.takeDirectory $ MPD.toString $  MPD.sgFilePath song) <> "'", class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 dark:text-rose-300 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "search"] ""
+                             button_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('deleteId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 dark:text-rose-300 hover:cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "trash-2"] ""
                        ) pl
 
 browsePage :: Maybe String -> Handler (Html ())
@@ -99,7 +99,7 @@ browsePage query_path = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.lsInfo $ maybe "" (fromString . id) query_path
   page Browse $ do
     div_ [class_ "flex place-content-between"] $ do
-      div_ [class_ "text-2xl"] "Browse"
+      div_ [class_ "text-2xl ml-10"] "Browse"
       if (isJust query_path) then div_ [class_ "flex gap-x-2"] $ do
         button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "bg-cyan-600 px-2 rounded-md text-white hover:bg-cyan-800 hover:cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
         button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "bg-cyan-600 px-2 rounded-md text-white hover:bg-cyan-800 hover:cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
@@ -107,7 +107,7 @@ browsePage query_path = do
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
       Right res -> table_ [class_ "table-auto w-full mt-4"] $ do
-        tbody_ $ mapM_ (\item -> tr_ [class_ "my-0 odd:bg-slate-50 even:bg-white hover:bg-sky-100 flex place-content-between px-2"] $ do
+        tbody_ $ mapM_ (\item -> tr_ [id_ "table_browse", class_ "odd:bg-slate-50 odd:dark:bg-slate-700 even:bg-white even:dark:bg-slate-800 hover:bg-sky-100 flex place-content-between px-2 my-0"] $ do
                            case item of
                              MPD.LsDirectory path -> do
                                mkItemIcon "folder"
