@@ -86,8 +86,8 @@ queuePage = do
         tbody_ $ mapM_ (\song ->
                           tr_ [class_ "flex place-content-between px-2 my-0"] $ do
                            td_ [class_ "flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
-                           td_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)),  class_ "py-2 flex place-content-between flex-grow cursor-pointer song-item"] $ do
-                             div_ ([class_ "text-ellipsis "] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ toHtml $ 
+                           td_ [class_ "flex place-content-between flex-grow cursor-pointer song-item flex"] $ do
+                             button_ ([onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "text-ellipsis py-2 w-full flex place-content-start focus:outline-none"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ toHtml $ 
                                maybe
                                (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song)
                                (\x -> maybe "No title metadata" MPD.toString (listToMaybe x))
@@ -116,20 +116,21 @@ browsePage query_path = do
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
       Right res -> table_ [class_ "table-auto w-full mt-4"] $ do
-        tbody_ $ mapM_ (\item -> tr_ [id_ "table_browse", class_ "hover:bg-sky-100 flex place-content-between px-2 my-0"] $ do
+        tbody_ $ mapM_ (\item -> tr_ [class_ "hover:bg-sky-100 flex place-content-between px-2 my-0"] $ do
                            case item of
                              MPD.LsDirectory path -> do
-                               mkItemIcon "folder"
-                               td_ [class_ "pl-4 py-2 overflow-hidden grow cursor-pointer", onclick_ $ "location.href='" <> (("/browse?path=" :: T.Text) <> (MPD.toText path)) <> "'"] $ toHtml $ fromMaybe "__" ((FP.splitDirectories $ MPD.toString path) !!? (( length $ FP.splitDirectories $ MPD.toString path ) - 1))
+                               mkIconField "folder"
+                               td_ [class_ "pl-4 py-0 overflow-hidden grow cursor-pointer flex"] $ do
+                                 a_ [href_ (("/browse?path=" :: T.Text) <> (MPD.toText path)), class_ "py-2 grow w-full h-full"] $ toHtml $ fromMaybe "__" ((FP.splitDirectories $ MPD.toString path) !!? (( length $ FP.splitDirectories $ MPD.toString path ) - 1))
                                mkQueueButtons(T.pack $ MPD.toString path)
                              MPD.LsSong song -> do
-                               mkItemIcon "music"
+                               mkIconField "music"
                                td_ [class_ "pl-4 py-2 overflow-hidden grow flex place-content-between"] $ do
                                  div_ $ toHtml $ maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> maybe "No title metadata" (FP.takeFileName . MPD.toString) (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags song))
                                  div_ [class_ "px-4"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
                                mkQueueButtons(T.pack $ MPD.toString $ MPD.sgFilePath song)
                              MPD.LsPlaylist playlist -> do 
-                               mkItemIcon "list"
+                               mkIconField "list"
                                td_ [class_ "pl-4 py-2 overflow-hidden grow"] $ toHtml $ FP.takeFileName $ MPD.toString playlist
                                mkQueueButtons(T.pack $ MPD.toString $ playlist)
                        ) (sortBy (\x y -> 
@@ -146,8 +147,8 @@ browsePage query_path = do
                                  ) res)
       
   where
-    mkItemIcon :: T.Text -> Html ()
-    mkItemIcon icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
+    mkIconField :: T.Text -> Html ()
+    mkIconField icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
     mkQueueButtons path = td_ [class_ "py-2 dark:text-blue-400 flex gap-x-4"] $ do 
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "hover:text-cyan-900 cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
