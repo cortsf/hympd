@@ -1,1 +1,1 @@
-Mpd client
+Mpd web client
