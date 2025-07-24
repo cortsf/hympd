@@ -67,8 +67,6 @@ nav_full current_page = nav_ [class_ "sticky top-0 w-full dark:text-blue-200 [&_
         p_ [id_ "currentSong", class_ "text-md text-blue-200 pt-2"] $ "Song Title"
       div_ [class_ "max-w-screen-xl flex flex-col items-center justify-between mx-auto px-4"] $ do
         input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-3 mt-1 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
-        -- input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,' + this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 mt-1 w-full h-1 rounded-lg cursor-pointer"]
-        -- input_ [id_ "playerProgressInput", oninput_ "console.log('seekCur,' + this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 mt-1 w-full h-1 rounded-lg cursor-pointer"]
 
 nav_compact :: Page -> Html ()
 nav_compact current_page = nav_ [class_ "sticky top-0 w-full bg-gray-900 dark:bg-gray-700 dark:text-blue-200 [&_.navItem]:dark:hover:text-yellow-600"] $ do
