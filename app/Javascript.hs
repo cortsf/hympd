@@ -92,11 +92,11 @@ jsblock = T.show $ renderJs $ [jmacro|
                                                  currentTime = 0;
                                            } else {
                                              //console.log(progressBar.value + ' is lt 100___ '+ival_totalTime+'___'+currentTime);
-                                             progressBar.value = (currentTime / ival_totalTime) * 100.0;
                                              progressBar.style.backgroundSize = ((currentTime / ival_totalTime) * 100.0) + '%';
-                                             currentTime = currentTime + 0.5;
+                                             progressBar.value = (currentTime / ival_totalTime) * 100.0;
+                                             currentTime = currentTime + 0.2;
                                            };
-                                         },500, stTime[1]);
+                                         },200, stTime[1]);
                                        };
                                      }; 
 
