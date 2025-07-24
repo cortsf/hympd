@@ -1,5 +1,4 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
-{-# OPTIONS_GHC -Wno-x-partial #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Web where
 
