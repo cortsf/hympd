@@ -31,13 +31,19 @@ data Page = Queue | Browse | Settings deriving Eq
 
 page :: Page -> Html () -> Handler (Html ())
 page current_page content = do
+  mpdStatus <- liftIO $ MPD.withMPD $ MPD.status
+  let current_time = case mpdStatus of
+        Left _ -> "0"
+        Right status -> case MPD.stTime status of
+          Nothing -> "0"
+          Just time -> T.pack $ show $ ((fst time / snd time) * 100)
   pure $ html_ $ do
     head_ $ do
       title_ "Hympd"
       script_ [src_ "static/styles.css"] ("" :: String)
       script_ [src_ "static/icons.js"] ("" :: String)
       link_ [rel_ "icon", href_ "static/favicon4.png", sizes_ "any", type_ "image/png"]
-      style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: rgba(255, 255, 255, 0.6); background-image: linear-gradient(#FFA100, #FFA100); background-size: 0% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
+      style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: rgba(255, 255, 255, 0.6); background-image: linear-gradient(#FFA100, #FFA100); background-size: " <> current_time <> "% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
     body_ [class_ "overflow-y-scroll flex flex-col bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400"] $ do
       nav_full current_page
       div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
