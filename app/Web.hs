@@ -37,6 +37,8 @@ page current_page content = do
       script_ [src_ "static/styles.css"] ("" :: String)
       script_ [src_ "static/icons.js"] ("" :: String)
       link_ [rel_ "icon", href_ "static/favicon4.png", sizes_ "any", type_ "image/png"]
+      style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: rgba(255, 255, 255, 0.6); border-radius: 5px; background-image: linear-gradient(#ff4500, #ff4500); background-size: 90% 100%; background-repeat: no-repeat;}"
+      style_ $ T.pack "#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; border-radius: 50%; background: #ff4500; cursor: ew-resize; box-shadow: 0 0 2px 0 #555; transition: background .3s ease-in-out;}"
     body_ [class_ "overflow-y-scroll flex flex-col bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400"] $ do
       nav_full current_page
       div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-8 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
@@ -63,11 +65,9 @@ nav_full current_page = nav_ [class_ "sticky top-0 w-full dark:text-blue-200 [&_
     div_ [class_ "px-8"] $ do
       div_ [class_ "max-w-screen-xl w-full mx-auto px-4"] $ do 
         p_ [id_ "currentSong", class_ "text-md text-blue-200 pt-2"] $ "Song Title"
-      div_ [class_ "max-w-screen-xl flex items-center justify-between mx-auto px-4"] $ do
-        -- input_ [id_ "playerProgress", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "range-lg h-3 mt-1 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
-        progress_ [id_ "playerProgressProgress", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "10", max_ "100", class_ "range-lg h-3 mt-1 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"] ""
-        -- div_ [id_ "playerProgressDiv", class_ "w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-800"] $ div_ [class_ "bg-blue-600 h-2.5 rounded-full", style_ "width: 0%"] $ ""
-
+      div_ [class_ "max-w-screen-xl flex flex-col items-center justify-between mx-auto px-4"] $ do
+        -- input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-3 mt-1 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
+        input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-3 mt-1 w-full h-1 rounded-lg cursor-pointer"]
 
 nav_compact :: Page -> Html ()
 nav_compact current_page = nav_ [class_ "sticky top-0 w-full bg-gray-900 dark:bg-gray-700 dark:text-blue-200 [&_.navItem]:dark:hover:text-yellow-600"] $ do
@@ -88,7 +88,7 @@ nav_compact current_page = nav_ [class_ "sticky top-0 w-full bg-gray-900 dark:bg
         button_ [id_ "navNext", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
         div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-blue-200"]
       div_ [class_ "max-w-screen-xl w-full flex items-center justify-between mx-auto mt-2"] $ do
-          input_ [id_ "playerProgress", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "h-2 appearance-none mt-1 w-full h-1 bg-gray-600 rounded-lg cursor-pointer dark:bg-slate-800"]
+          input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "h-2 mt-1 w-full h-1 bg-gray-600 rounded-lg cursor-pointer dark:bg-slate-800"]
 
 
 ------------------------------------------------------------

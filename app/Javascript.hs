@@ -69,7 +69,8 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      }; 
 
                                      function setProgressInput (stTime, stState) {  
-                                       progressBar = document.querySelector('#playerProgress');
+                                       console.log(stTime, stState);
+                                       progressBar = document.querySelector('#playerProgressInput');
                                        if(stState == "Stopped"){
                                          progressBar.disabled = true;
                                          progressBar.value=0;
@@ -84,7 +85,6 @@ jsblock = T.show $ renderJs $ [jmacro|
                                          clearInterval(refreshIntervalId);
                                          currentTime = stTime[0];
                                          refreshIntervalId = setInterval(function(ival_totalTime) {
-                                           progressBar = document.querySelector('#playerProgress');
                                            if(progressBar.value >= 100){
                                                  //console.log(progressBar.value + ' is gt 100___ '+ival_totalTime+'___'+currentTime);
                                                  clearInterval(refreshIntervalId);
@@ -93,6 +93,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                            } else {
                                              //console.log(progressBar.value + ' is lt 100___ '+ival_totalTime+'___'+currentTime);
                                              progressBar.value = (currentTime / ival_totalTime) * 100.0;
+                                             progressBar.style.backgroundSize = ((currentTime / ival_totalTime) * 100.0) + '%';
                                              currentTime = currentTime + 0.5;
                                            };
                                          },500, stTime[1]);
@@ -150,9 +151,9 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        setVolume(status.stVolume);
                                        //setSongTitleOnPlayer(status.stSongID, status.stState);
                                        setPlaybackState(status.stState);
-                                       setProgressProgress(status.stTime, status.stState);
+                                       // setProgressProgress(status.stTime, status.stState);
                                        //setProgressDiv(status.stTime, status.stState);
-                                       //setProgressInput(status.stTime, status.stState);
+                                       setProgressInput(status.stTime, status.stState);
                                        highlightCurrentSongOnQueue(status.stSongID, status.stState);
                                      };
 
