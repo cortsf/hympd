@@ -135,7 +135,7 @@ browsePage query_path = do
     div_ [class_ "flex place-content-between ml-4 mr-2"] $ do
       div_ [class_ "place-content-start"] $ do
         let dirlist = FP.splitDirectories $ maybe "" (fromString . id) query_path
-        span_ [class_ "text-2xl"] $ a_ [href_ "/browse", class_ "hover:text-blue-300"] "Browse"
+        span_ [class_ "text-2xl"] $ if isJust query_path then a_ [href_ "/browse", class_ "hover:text-blue-300"] "Browse" else "Browse"
         mapM_ (\(path, padding, dir) -> p_ [class_ "text-xs"] $ do (toHtmlRaw padding) >> (a_ [class_ "hover:text-blue-300", href_ $ "/browse?path=" <> T.pack path] $ toHtmlRaw ("&#11169;&nbsp;" <> dir))) $ zip3 
           (reverse $ mkPathList $ dirlist) 
           (mkPaddingList "&nbsp;" dirlist)
