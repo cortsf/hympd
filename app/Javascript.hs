@@ -87,12 +87,12 @@ jsblock = T.show $ renderJs $ [jmacro|
 
                                      socket.onmessage = function(event) {
                                        var status = JSON.parse(event.data);
-                                       console.log('new_message: ' + JSON.stringify(status));
-                                       setVolume(status.stVolume);
-                                       //setSongTitleOnPlayer(status.stSongID, status.stState);
-                                       setPlaybackState(status.stState);
+                                       // console.log('new_message: ' + JSON.stringify(status));
                                        setProgressInput(status.stTime, status.stState);
+                                       setVolume(status.stVolume);
+                                       setPlaybackState(status.stState);
                                        highlightCurrentSongOnQueue(status.stSongID, status.stState);
+                                       //setSongTitleOnPlayer(status.stSongID, status.stState);
                                      };
 
                                      socket.onerror = function(error_msg) {
