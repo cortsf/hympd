@@ -156,7 +156,7 @@ browsePage query_path = do
     mkPathList xs = [mconcat $ intersperse "/" xs] ++ (mkPathList $ init xs) 
     mkPaddingList :: String -> [String] -> [String]
     mkPaddingList _ [] = []
-    mkPaddingList padding (_:xs) = [padding] <> (mkPaddingList (padding <> "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;") xs)
+    mkPaddingList padding (_:xs) = [padding] <> (mkPaddingList (padding <> "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;") xs)
     mkIconField :: T.Text -> Html ()
     mkIconField icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
