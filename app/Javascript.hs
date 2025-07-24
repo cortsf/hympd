@@ -9,7 +9,6 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      var currentTime = 0.0;
 
                                      function setProgressInput (stTime, stState) {  
-                                       console.log(stTime, stState);
                                        progressBar = document.querySelector('#playerProgressInput');
                                        if(stState == "Stopped"){
                                          progressBar.disabled = true;
