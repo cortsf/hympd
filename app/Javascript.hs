@@ -8,9 +8,81 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      var refreshIntervalId;
                                      var currentTime = 0.0;
 
-                                     function startInterval(startTime, totalTime) {
+                                     function setProgressDiv (stTime, stState) {  
+                                       progressBar = document.querySelector('#playerProgressDiv').firstChild;
+                                       if(stState == "Stopped"){
+                                         progressBar.disabled = true;
+                                         progressBar.style.width='0%';
                                          clearInterval(refreshIntervalId);
-                                         currentTime = startTime;
+                                         currentTime = 0;
+                                       } else if (stState == "Paused"){
+                                         progressBar.disabled = false;
+                                         clearInterval(refreshIntervalId);
+                                         currentTime = 0;
+                                       } else if (stState == "Playing"){
+                                         progressBar.disabled = false;
+                                         clearInterval(refreshIntervalId);
+                                         currentTime = stTime[0];
+                                         refreshIntervalId = setInterval(function(ival_totalTime) {
+                                           progressBarVal = parseInt(progressBar.style.width, 10)
+                                           if(progressBarVal >= 100){
+                                                 clearInterval(refreshIntervalId);
+                                                 progressBar.style.width = '0%';
+                                                 currentTime = 0;
+                                           } else {
+                                             progressBar.style.width = ((currentTime / ival_totalTime) * 100.0) + '%';
+                                             currentTime = currentTime + 0.5;
+                                           };
+                                         },500, stTime[1]);
+                                       };
+                                     }; 
+
+                                     function setProgressProgress (stTime, stState) {  
+                                       console.log(stTime, stState);
+                                       progressBar = document.querySelector('#playerProgressProgress');
+                                       if(stState == "Stopped"){
+                                         progressBar.disabled = true;
+                                         progressBar.value=0;
+                                         clearInterval(refreshIntervalId);
+                                         currentTime = 0;
+                                       } else if (stState == "Paused"){
+                                         progressBar.disabled = false;
+                                         clearInterval(refreshIntervalId);
+                                         currentTime = 0;
+                                       } else if (stState == "Playing"){
+                                         progressBar.disabled = false;
+                                         clearInterval(refreshIntervalId);
+                                         currentTime = stTime[0];
+                                         refreshIntervalId = setInterval(function(ival_totalTime) {
+                                           if(progressBar.value >= 100){
+                                                 //console.log(progressBar.value + ' is gt 100___ '+ival_totalTime+'___'+currentTime);
+                                                 clearInterval(refreshIntervalId);
+                                                 progressBar.value = 0;
+                                                 currentTime = 0;
+                                           } else {
+                                             //console.log(progressBar.value + ' is lt 100___ '+ival_totalTime+'___'+currentTime);
+                                             progressBar.value = (currentTime / ival_totalTime) * 100.0;
+                                             currentTime = currentTime + 0.5;
+                                           };
+                                         },500, stTime[1]);
+                                       };
+                                     }; 
+
+                                     function setProgressInput (stTime, stState) {  
+                                       progressBar = document.querySelector('#playerProgress');
+                                       if(stState == "Stopped"){
+                                         progressBar.disabled = true;
+                                         progressBar.value=0;
+                                         clearInterval(refreshIntervalId);
+                                         currentTime = 0;
+                                       } else if (stState == "Paused"){
+                                         progressBar.disabled = false;
+                                         clearInterval(refreshIntervalId);
+                                         currentTime = 0;
+                                       } else if (stState == "Playing"){
+                                         progressBar.disabled = false;
+                                         clearInterval(refreshIntervalId);
+                                         currentTime = stTime[0];
                                          refreshIntervalId = setInterval(function(ival_totalTime) {
                                            progressBar = document.querySelector('#playerProgress');
                                            if(progressBar.value >= 100){
@@ -23,27 +95,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                              progressBar.value = (currentTime / ival_totalTime) * 100.0;
                                              currentTime = currentTime + 0.5;
                                            };
-                                         },500, totalTime);
-                                     };
-
-
-                                     function stopInterval() {
-                                         clearInterval(refreshIntervalId);
-                                         currentTime = 0;
-                                     };
-
-                                     function setProgress (stTime, stState) {  
-                                       progressBar = document.querySelector('#playerProgress');
-                                       if(stState == "Stopped"){
-                                         progressBar.disabled = true;
-                                         progressBar.value=0;
-                                         stopInterval();
-                                       } else if (stState == "Paused"){
-                                         progressBar.disabled = false;
-                                         stopInterval();
-                                       } else if (stState == "Playing"){
-                                         progressBar.disabled = false;
-                                         startInterval(stTime[0], stTime[1]);
+                                         },500, stTime[1]);
                                        };
                                      }; 
 
@@ -98,7 +150,9 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        setVolume(status.stVolume);
                                        //setSongTitleOnPlayer(status.stSongID, status.stState);
                                        setPlaybackState(status.stState);
-                                       setProgress(status.stTime, status.stState);
+                                       setProgressProgress(status.stTime, status.stState);
+                                       //setProgressDiv(status.stTime, status.stState);
+                                       //setProgressInput(status.stTime, status.stState);
                                        highlightCurrentSongOnQueue(status.stSongID, status.stState);
                                      };
 
