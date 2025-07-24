@@ -42,5 +42,6 @@ executable hympd
                     , containers
                     , parsec
                     , time
+                    -- , safe
     hs-source-dirs:   app
     default-language: GHC2024

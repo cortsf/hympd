@@ -17,7 +17,6 @@ import Data.Coerce (coerce)
 import Lucid
 import Servant (Handler)
 import GHC.Generics
--- import Data.Char (chr)
 import qualified Data.Text as T
 import qualified Network.MPD as MPD
 import qualified Data.Map.Strict as C
@@ -131,21 +130,24 @@ queuePage = do
 
 browsePage :: Maybe String -> Handler (Html ())
 browsePage query_path = do
+  let dirlist = FP.splitDirectories $ maybe "" (fromString . id) query_path
   mpdResult <- liftIO $ MPD.withMPD $ MPD.lsInfo $ maybe "" (fromString . id) query_path
   page Browse $ do
     div_ [class_ "flex place-content-between ml-4 mr-2"] $ do
       div_ [class_ "place-content-start"] $ do
-        let dirlist = FP.splitDirectories $ maybe "" (fromString . id) query_path
         span_ [class_ "text-2xl"] $ if isJust query_path then a_ [href_ "/browse", class_ "hover:text-blue-300"] "Browse" else "Browse"
         mapM_ (\(path, padding, dir, index) -> p_ [class_ "text-sm"] $ do (toHtmlRaw padding) >> if index < length dirlist then (toHtmlRaw $ T.pack ("&#11169;&nbsp;")) <> (a_ [class_ "hover:text-blue-400", href_ $ "/browse?path=" <> T.pack path] $ toHtml dir) else span_ [class_ "text-zinc-500"] $ toHtmlRaw ("&#11169;&nbsp;" <> dir)) $ zip4
           (reverse $ mkPathList $ dirlist) 
           (mkPaddingList "&nbsp;" dirlist)
           (dirlist)
           [1 .. length dirlist]
-      if (isJust query_path) then div_ [class_ "items-end flex gap-x-2 [&_button]:text-slate-400 [&_button]:hover:text-slate-200 [&_button]:dark:bg-cyan-900 [&_button]:dark:hover:bg-cyan-700"] $ do
-        button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
-        button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
-        else  div_ ""
+      case query_path of
+        Just (_x:_xs) -> do
+          div_ [class_ "items-end flex gap-x-2 [&_button]:text-slate-400 [&_button]:hover:text-slate-200 [&_button]:dark:bg-cyan-900 [&_button]:dark:hover:bg-cyan-700"] $ do
+            button_ [onclick_ $ "location.href='/browse" <> (if length dirlist > 1 then T.pack $ "?path=" <> (mconcat $ intersperse "/" (init dirlist)) else "") <> "'", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "corner-left-up"] "" <> span_ [class_ "ml-1"] "Up")
+            button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
+            button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
+        _ -> div_ ""
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
       Right res -> table_ [class_ "table-auto w-full mt-4"] $ do
