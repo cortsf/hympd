@@ -77,7 +77,7 @@ queuePage :: Handler (Html ())
 queuePage = do
   playlist <- liftIO $ MPD.withMPD $ MPD.playlistInfo Nothing
   page Queue $ do
-    div_ [class_ "flex place-content-between ml-10 mr-2 [&_button]:dark:bg-blue-400 [&_button]:dark:hover:bg-blue-300"] $ do
+    div_ [class_ "flex place-content-between ml-4 mr-2 [&_button]:dark:bg-blue-400 [&_button]:dark:hover:bg-blue-300"] $ do
       span_ [class_ "text-2xl"] $ "Queue"
       div_ [class_ "flex gap-x-2"]$ do
         button_ [onclick_ "alert('Not implemented')", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "shuffle"] "" <> span_ [class_ "ml-1"] "Random")
@@ -106,10 +106,14 @@ browsePage :: Maybe String -> Handler (Html ())
 browsePage query_path = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.lsInfo $ maybe "" (fromString . id) query_path
   page Browse $ do
-    div_ [class_ "flex place-content-between ml-10 mr-2"] $ do
+    div_ [class_ "flex place-content-between ml-4 mr-2"] $ do
       div_ [class_ "place-content-start"] $ do
+        let dirlist = FP.splitDirectories $ maybe "" (fromString . id) query_path
         span_ [class_ "text-2xl"] $ a_ [href_ "/browse", class_ "hover:text-blue-300"] "Browse"
-        mapM_ (\(path, dir) -> p_ [class_ "text-xs"] $ a_ [class_ "hover:text-blue-300", href_ $ "/browse?path=" <> T.pack path] $ toHtml dir) $ zip (reverse $ combine $ FP.splitDirectories $ maybe "" (fromString . id) query_path) (FP.splitDirectories $ maybe "" (fromString . id) query_path)
+        mapM_ (\(path, padding, dir) -> p_ [class_ "text-xs"] $ do (toHtmlRaw padding) >> (a_ [class_ "hover:text-blue-300", href_ $ "/browse?path=" <> T.pack path] $ toHtmlRaw ("&#11169;&nbsp;" <> dir))) $ zip3 
+          (reverse $ mkPathList $ dirlist) 
+          (mkPaddingList "&nbsp;" dirlist)
+          (dirlist)
       if (isJust query_path) then div_ [class_ "flex gap-x-2 [&_button]:dark:bg-blue-400 [&_button]:dark:hover:bg-blue-300 items-end"] $ do
         button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
         button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
@@ -148,26 +152,24 @@ browsePage query_path = do
                                  ) res)
       
   where
-    combine :: [String] -> [String]
-    combine [] = []
-    combine xs = [mconcat $ intersperse "/" xs] ++ (combine $ init xs) 
+    mkPathList :: [String] -> [String]
+    mkPathList [] = []
+    mkPathList xs = [mconcat $ intersperse "/" xs] ++ (mkPathList $ init xs) 
+    mkPaddingList :: String -> [String] -> [String]
+    mkPaddingList _ [] = []
+    mkPaddingList padding (_:xs) = [padding] <> (mkPaddingList (padding <> "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;") xs)
     mkIconField :: T.Text -> Html ()
     mkIconField icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
     mkQueueButtons path = td_ [class_ "py-2 dark:text-blue-400 flex gap-x-4"] $ do 
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "hover:text-cyan-900 cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
       button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "hover:text-cyan-900 cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
--- parentDirs :: FilePath -> [(T.Text, T.Text)]
--- parentDirs path = (\(fst, snd) -> foldr ()  tail_path)
---   let currentPath = FP.joinPath [path]
---   let parents = map (`FP.joinPath` []) $ filter (/= "") $ tail $ FP.splitDirectories currentPath
---   return parents
 
 settingsPage :: Handler (Html ())
 settingsPage = do
   mpdResult <- liftIO $ MPD.withMPD $ MPD.config
   mpdStatus <- liftIO $ MPD.withMPD $ MPD.status
   page Settings $ do
-    p_ [class_ "text-2xl ml-10"] "Settings"
+    p_ [class_ "text-2xl ml-4"] "Settings"
     div_ [class_ "bg-gray-200 mt-4 p-4"] $ toHtml $ show mpdStatus
     div_ [class_ "bg-blue-200 mt-4 w-full"] $ toHtml $ show mpdResult
