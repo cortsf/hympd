@@ -26,12 +26,10 @@ jsblock = T.show $ renderJs $ [jmacro|
                                          currentTime = stTime[0];
                                          refreshIntervalId = setInterval(function(ival_totalTime) {
                                            if(progressBar.value >= 100){
-                                                 //console.log(progressBar.value + ' is gt 100___ '+ival_totalTime+'___'+currentTime);
                                                  clearInterval(refreshIntervalId);
                                                  progressBar.value = 0;
                                                  currentTime = 0;
                                            } else {
-                                             //console.log(progressBar.value + ' is lt 100___ '+ival_totalTime+'___'+currentTime);
                                              progressBar.style.backgroundSize = ((currentTime / ival_totalTime) * 100.0) + '%';
                                              progressBar.value = (currentTime / ival_totalTime) * 100.0;
                                              currentTime = currentTime + 0.2;
