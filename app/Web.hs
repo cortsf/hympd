@@ -101,11 +101,6 @@ queuePage = do
                              button_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('deleteId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 dark:text-rose-300 cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "trash-2"] ""
                        ) pl
 
-combinations :: [String] -> [String]
-combinations list = reverse $ combine $ list
-  where combine :: [String] -> [String]
-        combine [] = []
-        combine rlist = [mconcat $ intersperse "/" rlist] ++ (combine $ init rlist) 
 
 browsePage :: Maybe String -> Handler (Html ())
 browsePage query_path = do
@@ -114,7 +109,7 @@ browsePage query_path = do
     div_ [class_ "flex place-content-between ml-10 mr-2"] $ do
       div_ [class_ "place-content-start"] $ do
         span_ [class_ "text-2xl"] $ a_ [href_ "/browse", class_ "hover:text-blue-300"] "Browse"
-        mapM_ (\(path, dir) -> p_ [class_ "text-xs"] $ a_ [class_ "hover:text-blue-300", href_ $ "/browse?path=" <> T.pack path] $ toHtml dir) $ zip (combinations $ FP.splitDirectories $ maybe "" (fromString . id) query_path) (FP.splitDirectories $ maybe "" (fromString . id) query_path)
+        mapM_ (\(path, dir) -> p_ [class_ "text-xs"] $ a_ [class_ "hover:text-blue-300", href_ $ "/browse?path=" <> T.pack path] $ toHtml dir) $ zip (reverse $ combine $ FP.splitDirectories $ maybe "" (fromString . id) query_path) (FP.splitDirectories $ maybe "" (fromString . id) query_path)
       if (isJust query_path) then div_ [class_ "flex gap-x-2 [&_button]:dark:bg-blue-400 [&_button]:dark:hover:bg-blue-300 items-end"] $ do
         button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
         button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
@@ -153,6 +148,9 @@ browsePage query_path = do
                                  ) res)
       
   where
+    combine :: [String] -> [String]
+    combine [] = []
+    combine xs = [mconcat $ intersperse "/" xs] ++ (combine $ init xs) 
     mkIconField :: T.Text -> Html ()
     mkIconField icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
