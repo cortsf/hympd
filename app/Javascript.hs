@@ -11,27 +11,30 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      function setProgressInput (stTime, stState) {  
                                        progressBar = document.querySelector('#playerProgressInput');
                                        if(stState == "Stopped"){
+                                         clearInterval(refreshIntervalId);
+                                         currentTime = 0;
                                          progressBar.disabled = true;
                                          progressBar.value=0;
-                                         clearInterval(refreshIntervalId);
-                                         currentTime = 0;
+                                         progressBar.style.backgroundSize = '0%';
                                        } else if (stState == "Paused"){
-                                         progressBar.disabled = false;
-                                         clearInterval(refreshIntervalId);
-                                         currentTime = 0;
-                                       } else if (stState == "Playing"){
-                                         progressBar.disabled = false;
                                          clearInterval(refreshIntervalId);
                                          currentTime = stTime[0];
+                                         progressBar.disabled = false;
+                                         progressBar.value = (stTime[0] / stTime[1]) * 100.0;
+                                         progressBar.style.backgroundSize = ((stTime[0] / stTime[1]) * 100.0) + '%';
+                                       } else if (stState == "Playing"){
+                                         clearInterval(refreshIntervalId);
+                                         currentTime = stTime[0];
+                                         progressBar.disabled = false;
                                          refreshIntervalId = setInterval(function(ival_totalTime) {
                                            if(progressBar.value >= 100){
                                                  clearInterval(refreshIntervalId);
                                                  progressBar.value = 0;
                                                  currentTime = 0;
                                            } else {
-                                             progressBar.style.backgroundSize = ((currentTime / ival_totalTime) * 100.0) + '%';
-                                             progressBar.value = (currentTime / ival_totalTime) * 100.0;
                                              currentTime = currentTime + 0.2;
+                                             progressBar.value = (currentTime / ival_totalTime) * 100.0;
+                                             progressBar.style.backgroundSize = ((currentTime / ival_totalTime) * 100.0) + '%';
                                            };
                                          },200, stTime[1]);
                                        };
