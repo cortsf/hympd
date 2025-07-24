@@ -8,8 +8,18 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      var refreshIntervalId;
                                      var currentTime = 0.0;
 
+                                     function time_from_seconds(seconds){ 
+                                       if(seconds > 3600){
+                                         return ('0'+Math.floor(seconds/3600) % 24).slice(-2)+':'+('0'+Math.floor(seconds/60)%60).slice(-2)+':'+('0' + seconds % 60).slice(-2);
+                                       }else{
+                                         return ('0'+Math.floor(seconds/60)%60).slice(-2)+':'+('0' + seconds % 60).slice(-2);
+                                       };
+                                     };
+
                                      function setProgressInput (stTime, stState) {  
                                        progressBar = document.querySelector('#playerProgressInput');
+                                       document.querySelector('#totalTime').innerHTML=time_from_seconds(stTime[1]);
+                                       
                                        if(stState == "Stopped"){
                                          clearInterval(refreshIntervalId);
                                          currentTime = 0;
@@ -33,6 +43,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                                  currentTime = 0;
                                            } else {
                                              currentTime = currentTime + 0.2;
+                                             document.querySelector('#elapsedTime').innerHTML=time_from_seconds(Math.floor(currentTime));
                                              progressBar.value = (currentTime / ival_totalTime) * 100.0;
                                              progressBar.style.backgroundSize = ((currentTime / ival_totalTime) * 100.0) + '%';
                                            };

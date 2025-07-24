@@ -70,8 +70,9 @@ nav_full current_page = nav_ [class_ "sticky top-0 w-full dark:text-blue-200 [&_
     div_ [class_ "px-8"] $ do
       div_ [class_ "max-w-screen-xl w-full mx-auto px-4"] $ do 
         p_ [id_ "currentSong", class_ "text-md text-blue-200 pt-2"] $ "Song Title"
-      div_ [class_ "max-w-screen-xl flex flex-col items-center justify-between mx-auto px-4"] $ do
-        input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 mt-1 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
+      div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 mt-1"] $ do
+        div_ [class_ "grow"] $ input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
+        div_ [class_ ""] $ span_ [id_ "elapsedTime"] "00:00" <> span_ [class_ "mx-1"] "/" <> span_ [id_ "totalTime"] "00:00"
 
 nav_compact :: Page -> Html ()
 nav_compact current_page = nav_ [class_ "sticky top-0 w-full bg-gray-900 dark:bg-gray-700 dark:text-blue-200 [&_.navItem]:dark:hover:text-yellow-600"] $ do
