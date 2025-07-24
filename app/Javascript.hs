@@ -18,8 +18,6 @@ jsblock = T.show $ renderJs $ [jmacro|
 
                                      function setProgressInput (stTime, stState) {  
                                        progressBar = document.querySelector('#playerProgressInput');
-                                       document.querySelector('#elapsedTime').innerHTML=time_from_seconds(Math.floor(stTime[0]));
-                                       document.querySelector('#totalTime').innerHTML=time_from_seconds(Math.floor(stTime[1]));
                                        
                                        if(stState == "Stopped"){
                                          clearInterval(refreshIntervalId);
@@ -33,10 +31,14 @@ jsblock = T.show $ renderJs $ [jmacro|
                                          progressBar.disabled = false;
                                          progressBar.value = (stTime[0] / stTime[1]) * 100.0;
                                          progressBar.style.backgroundSize = ((stTime[0] / stTime[1]) * 100.0) + '%';
+                                         document.querySelector('#elapsedTime').innerHTML=time_from_seconds(Math.floor(stTime[0]));
+                                         document.querySelector('#totalTime').innerHTML=time_from_seconds(Math.floor(stTime[1]));
                                        } else if (stState == "Playing"){
                                          clearInterval(refreshIntervalId);
                                          currentTime = stTime[0];
                                          progressBar.disabled = false;
+                                         document.querySelector('#elapsedTime').innerHTML=time_from_seconds(Math.floor(stTime[0]));
+                                         document.querySelector('#totalTime').innerHTML=time_from_seconds(Math.floor(stTime[1]));
                                          refreshIntervalId = setInterval(function(ival_totalTime) {
                                            if(currentTime >= ival_totalTime){
                                                  clearInterval(refreshIntervalId);
