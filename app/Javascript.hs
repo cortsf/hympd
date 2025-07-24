@@ -18,8 +18,8 @@ jsblock = T.show $ renderJs $ [jmacro|
 
                                      function setProgressInput (stTime, stState) {  
                                        progressBar = document.querySelector('#playerProgressInput');
-                                       document.querySelector('#elapsedTime').innerHTML=time_from_seconds(Math.ceil(stTime[0]));
-                                       document.querySelector('#totalTime').innerHTML=time_from_seconds(Math.ceil(stTime[1]));
+                                       document.querySelector('#elapsedTime').innerHTML=time_from_seconds(Math.floor(stTime[0]));
+                                       document.querySelector('#totalTime').innerHTML=time_from_seconds(Math.floor(stTime[1]));
                                        
                                        if(stState == "Stopped"){
                                          clearInterval(refreshIntervalId);
@@ -44,7 +44,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                                  currentTime = 0;
                                            } else {
                                              currentTime = currentTime + 0.2;
-                                             document.querySelector('#elapsedTime').innerHTML=time_from_seconds(Math.ceil(currentTime));
+                                             document.querySelector('#elapsedTime').innerHTML=time_from_seconds(Math.floor(currentTime));
                                              progressBar.value = (currentTime / ival_totalTime) * 100.0;
                                              progressBar.style.backgroundSize = ((currentTime / ival_totalTime) * 100.0) + '%';
                                            };
