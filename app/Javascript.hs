@@ -12,7 +12,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                          clearInterval(refreshIntervalId);
                                          currentTime = startTime;
                                          refreshIntervalId = setInterval(function(ival_totalTime) {
-                                           progressBar = document.querySelector('#footerProgress');
+                                           progressBar = document.querySelector('#playerProgress');
                                            if(progressBar.value >= 100){
                                                  //console.log(progressBar.value + ' is gt 100___ '+ival_totalTime+'___'+currentTime);
                                                  clearInterval(refreshIntervalId);
@@ -33,7 +33,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      };
 
                                      function setProgress (stTime, stState) {  
-                                       progressBar = document.querySelector('#footerProgress');
+                                       progressBar = document.querySelector('#playerProgress');
                                        if(stState == "Stopped"){
                                          progressBar.disabled = true;
                                          progressBar.value=0;
@@ -52,7 +52,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        document.querySelector('#navVolume').value=stVolume 
                                      };
 
-                                     function setSongTitleOnFooter (stSongID, stState) { 
+                                     function setSongTitleOnPlayer (stSongID, stState) { 
                                        console.log('This implementation only works on queue. ' + stSongID + '_' + stState)
                                        //if(stState == "Stopped"){
                                        //  document.querySelector('#currentSong').innerHTML='..';
@@ -96,7 +96,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        var status = JSON.parse(event.data);
                                        console.log('new_message: ' + JSON.stringify(status));
                                        setVolume(status.stVolume);
-                                       //setSongTitleOnFooter(status.stSongID, status.stState);
+                                       //setSongTitleOnPlayer(status.stSongID, status.stState);
                                        setPlaybackState(status.stState);
                                        setProgress(status.stTime, status.stState);
                                        highlightCurrentSongOnQueue(status.stSongID, status.stState);
