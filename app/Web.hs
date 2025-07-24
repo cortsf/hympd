@@ -43,7 +43,7 @@ page current_page content = do
       script_ [src_ "static/styles.css"] ("" :: String)
       script_ [src_ "static/icons.js"] ("" :: String)
       link_ [rel_ "icon", href_ "static/favicon4.png", sizes_ "any", type_ "image/png"]
-      style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: rgba(255, 255, 255, 0.6); background-image: linear-gradient(#FFA100, #FFA100); background-size: " <> current_time <> "% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
+      style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: oklch(55.6% 0 0); background-image: linear-gradient(#FFD6A8, #FFD6A8); background-size: " <> current_time <> "% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
     body_ [class_ "overflow-y-scroll flex flex-col bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400"] $ do
       nav_full current_page
       div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
@@ -60,19 +60,19 @@ nav_full current_page = nav_ [class_ "sticky top-0 w-full dark:text-blue-200 [&_
           li_ $ a_ [href_ "/queue", classes_ [if current_page == Queue then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Queue"
           li_ $ a_ [href_ "/browse", classes_ [if current_page == Browse then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Browse"
           li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Settings"
-      div_ [class_ "flex space-x-4 "] $ do
-        button_ [id_ "navPrevious", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
-        button_ [id_ "navStop", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
-        button_ [id_ "navPlayPause", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_  [data_ "feather" "play", class_ "focus:text-red-200"] ""
-        button_ [id_ "navNext", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
+      div_ [class_ "flex space-x-4"] $ do
+        button_ [id_ "navPrevious", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-back", class_ "size-6"] ""
+        button_ [id_ "navStop", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "square", class_ "size-6"] ""
+        button_ [id_ "navPlayPause", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_  [data_ "feather" "play", class_ "size-6"] ""
+        button_ [id_ "navNext", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward", class_ "size-6"] ""
         div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-blue-200"]
-  div_ [class_ "bg-slate-600 dark:bg-slate-700 w-full mx-auto pb-3"] $ do
+  div_ [class_ "bg-slate-600 dark:bg-slate-700 w-full mx-auto pb-2"] $ do
     div_ [class_ "px-8"] $ do
-      div_ [class_ "max-w-screen-xl w-full mx-auto px-4"] $ do 
-        p_ [id_ "currentSong", class_ "text-md text-blue-200 pt-2"] $ "Song Title"
-      div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 mt-1"] $ do
+      div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex place-content-end text-md text-blue-200 pt-2 text-lg"] $ do 
+        span_ [id_ "currentSong", class_ "text-orange-200"] $ "Song Title, a very long one, you can see!"
+      div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 mt-0"] $ do
         div_ [class_ "grow"] $ input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
-        div_ [class_ ""] $ span_ [id_ "elapsedTime"] "00:00" <> span_ [class_ "mx-1"] "/" <> span_ [id_ "totalTime"] "00:00"
+        div_ [class_ "text-neutral-500 font-bold italic text-md"] $ span_ [id_ "elapsedTime", class_ ""] "00:00" <> span_ [class_ "mx-1"] "/" <> span_ [id_ "totalTime", class_ ""] "00:00"
 
 nav_compact :: Page -> Html ()
 nav_compact current_page = nav_ [class_ "sticky top-0 w-full bg-gray-900 dark:bg-gray-700 dark:text-blue-200 [&_.navItem]:dark:hover:text-yellow-600"] $ do
