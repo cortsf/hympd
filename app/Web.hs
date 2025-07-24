@@ -63,7 +63,7 @@ nav_full current_page = nav_ [class_ "sticky top-0 w-full dark:text-blue-200 [&_
       div_ [class_ "flex space-x-4 "] $ do
         button_ [id_ "navPrevious", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
         button_ [id_ "navStop", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
-        button_ [id_ "navPlayPause", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_  [data_ "feather" "play"] ""
+        button_ [id_ "navPlayPause", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_  [data_ "feather" "play", class_ "focus:text-red-200"] ""
         button_ [id_ "navNext", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
         div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-blue-200"]
   div_ [class_ "bg-slate-600 dark:bg-slate-700 w-full mx-auto pb-3"] $ do
@@ -103,7 +103,7 @@ queuePage :: Handler (Html ())
 queuePage = do
   playlist <- liftIO $ MPD.withMPD $ MPD.playlistInfo Nothing
   page Queue $ do
-    div_ [class_ "flex place-content-between ml-4 mr-2 [&_button]:dark:bg-blue-400 [&_button]:dark:hover:bg-blue-300"] $ do
+    div_ [class_ "flex place-content-between ml-4 mr-2 [&_button]:text-slate-400 [&_button]:hover:text-slate-200 [&_button]:dark:bg-cyan-900 [&_button]:dark:hover:bg-cyan-700"] $ do
       span_ [class_ "text-2xl"] $ "Queue"
       div_ [class_ "flex gap-x-2"]$ do
         button_ [onclick_ "alert('Not implemented')", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "shuffle"] "" <> span_ [class_ "ml-1"] "Random")
@@ -140,7 +140,7 @@ browsePage query_path = do
           (reverse $ mkPathList $ dirlist) 
           (mkPaddingList "&nbsp;" dirlist)
           (dirlist)
-      if (isJust query_path) then div_ [class_ "flex gap-x-2 [&_button]:dark:bg-blue-400 [&_button]:dark:hover:bg-blue-300 items-end"] $ do
+      if (isJust query_path) then div_ [class_ "items-end flex gap-x-2 [&_button]:text-slate-400 [&_button]:hover:text-slate-200 [&_button]:dark:bg-cyan-900 [&_button]:dark:hover:bg-cyan-700"] $ do
         button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
         button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
         else  div_ ""
@@ -187,9 +187,9 @@ browsePage query_path = do
     mkIconField :: T.Text -> Html ()
     mkIconField icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
-    mkQueueButtons path = td_ [class_ "py-2 dark:text-blue-400 flex gap-x-4"] $ do 
-      button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "hover:text-cyan-900 cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
-      button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "hover:text-cyan-900 cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
+    mkQueueButtons path = td_ [class_ "py-2 [&_button]:dark:text-blue-400 [&_button]:dark:hover:text-cyan-950 flex gap-x-4"] $ do 
+      button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
+      button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
 
 settingsPage :: Handler (Html ())
 settingsPage = do

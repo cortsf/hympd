@@ -27,7 +27,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                          currentTime = stTime[0];
                                          progressBar.disabled = false;
                                          refreshIntervalId = setInterval(function(ival_totalTime) {
-                                           if(progressBar.value >= 100){
+                                           if(currentTime >= ival_totalTime){
                                                  clearInterval(refreshIntervalId);
                                                  progressBar.value = 0;
                                                  currentTime = 0;
