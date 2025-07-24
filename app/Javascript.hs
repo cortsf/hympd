@@ -65,10 +65,10 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        var current_class = 'text-blue-400';
                                        if ( window.location.pathname == "/queue" ){
                                          if(stState == "Stopped"){
-                                           document.querySelector(".song-item").classList.remove(current_class);
+                                           document.querySelectorAll(".song-item").forEach(function(x){x.classList.remove(current_class)});
                                          } else {
                                            document.querySelectorAll(".song-item").forEach(function(x){x.classList.remove(current_class)});
-                                           document.querySelector("div[data-songId='"+stSongID+"']").parentNode.classList.add(current_class);
+                                           document.querySelector("button[data-songId='"+stSongID+"']").parentNode.classList.add(current_class);
                                          };
                                        };
                                      };

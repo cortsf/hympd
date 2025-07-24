@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
+{-# OPTIONS_GHC -Wno-x-partial #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Web where
 
@@ -78,7 +79,12 @@ queuePage = do
   page Queue $ do
     div_ [class_ "flex place-content-between ml-10 mr-2 [&_button]:dark:bg-blue-400 [&_button]:dark:hover:bg-blue-300"] $ do
       span_ [class_ "text-2xl"] $ "Queue"
-      button_ [onclick_ "socket.send('clear')", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Clear")
+      div_ [class_ "flex gap-x-2"]$ do
+        button_ [onclick_ "alert('Not implemented')", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "shuffle"] "" <> span_ [class_ "ml-1"] "Random")
+        button_ [onclick_ "alert('Not implemented')", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "file-minus"] "" <> span_ [class_ "ml-1"] "Consume")
+        button_ [onclick_ "alert('Not implemented')", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "star"] "" <> span_ [class_ "ml-1"] "Single")
+        button_ [onclick_ "alert('Not implemented')", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "repeat"] "" <> span_ [class_ "ml-1"] "Repeat")
+        button_ [onclick_ "socket.send('clear')", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "file"] "" <> span_ [class_ "ml-1"] "Clear")
     case playlist of
       Left _ -> p_ "playlist error"
       Right [] -> div_ [class_ "px-10 mt-4 text-rose-400"] $ p_ "-Empty queue-"
@@ -87,7 +93,7 @@ queuePage = do
                           tr_ [class_ "flex place-content-between px-2 my-0"] $ do
                            td_ [class_ "flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
                            td_ [class_ "flex place-content-between flex-grow cursor-pointer song-item flex"] $ do
-                             button_ ([onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "place-content-between py-2 w-full flex flex-row place-content-start focus:outline-none"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ do
+                             button_ ([onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "place-content-between py-2 w-full flex flex-row place-content-start focus:outline-none cursor-pointer"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ do
                                div_ [class_ "text-ellipsis grow flex place-content-start"] $ toHtml $ maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> maybe "No title metadata" (MPD.toString) (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags song))
                                div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
                            td_ [class_ "flex gap-x-2"] $ do
@@ -95,7 +101,11 @@ queuePage = do
                              button_ [onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('deleteId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "pl-0 pr-4 w-1 text-red-300 hover:text-red-400 dark:text-rose-300 cursor-pointer"] $ i_ [class_ "size-4 stroke-2", data_ "feather" "trash-2"] ""
                        ) pl
 
-
+combinations :: [String] -> [String]
+combinations list = reverse $ combine $ list
+  where combine :: [String] -> [String]
+        combine [] = []
+        combine rlist = [mconcat $ intersperse "/" rlist] ++ (combine $ init rlist) 
 
 browsePage :: Maybe String -> Handler (Html ())
 browsePage query_path = do
@@ -103,9 +113,8 @@ browsePage query_path = do
   page Browse $ do
     div_ [class_ "flex place-content-between ml-10 mr-2"] $ do
       div_ [class_ "place-content-start"] $ do
-        span_ [class_ "text-2xl"] $ "Browse"
-        -- mapM_ (\dir -> p_ [class_ "text-xs"] $ a_ [href_ $ "/browse?path=" <> T.pack dir] $ toHtml dir) (FP.splitDirectories $ maybe "" (fromString . id) query_path)
-        mapM_ (\(path, dir) -> p_ [class_ "text-xs"] $ a_ [class_ "hover:text-blue-300", href_ $ "/browse?path=" <> T.pack path] $ toHtml dir) $ zip (FP.splitDirectories $ maybe "" (fromString . id) query_path) (FP.splitDirectories $ maybe "" (fromString . id) query_path)
+        span_ [class_ "text-2xl"] $ a_ [href_ "/browse", class_ "hover:text-blue-300"] "Browse"
+        mapM_ (\(path, dir) -> p_ [class_ "text-xs"] $ a_ [class_ "hover:text-blue-300", href_ $ "/browse?path=" <> T.pack path] $ toHtml dir) $ zip (combinations $ FP.splitDirectories $ maybe "" (fromString . id) query_path) (FP.splitDirectories $ maybe "" (fromString . id) query_path)
       if (isJust query_path) then div_ [class_ "flex gap-x-2 [&_button]:dark:bg-blue-400 [&_button]:dark:hover:bg-blue-300 items-end"] $ do
         button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
         button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
