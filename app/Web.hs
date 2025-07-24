@@ -12,7 +12,7 @@ import Data.Maybe (listToMaybe, maybeToList, fromMaybe, isJust)
 import Data.Time.Clock.POSIX
 import Data.String(fromString)
 import Data.Time.Format
-import Data.List (sortBy, intersperse)
+import Data.List (sortBy, intersperse, zip4)
 import Data.Coerce (coerce)
 import Lucid
 import Servant (Handler)
@@ -88,7 +88,7 @@ nav_compact current_page = nav_ [class_ "sticky top-0 w-full bg-gray-900 dark:bg
           p_ [id_ "currentSong", class_ "text-md text-blue-200"] $ "Song Title"
         button_ [id_ "navPrevious", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
         button_ [id_ "navStop", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
-        button_ [id_ "navPlayPause", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_  [data_ "feather" "play"] ""
+        button_ [id_ "navPlayPause", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200 focus:text-blue-200"] $ i_  [data_ "feather" "play"] ""
         button_ [id_ "navNext", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
         div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-blue-200"]
       div_ [class_ "max-w-screen-xl w-full flex items-center justify-between mx-auto mt-2"] $ do
@@ -136,10 +136,11 @@ browsePage query_path = do
       div_ [class_ "place-content-start"] $ do
         let dirlist = FP.splitDirectories $ maybe "" (fromString . id) query_path
         span_ [class_ "text-2xl"] $ if isJust query_path then a_ [href_ "/browse", class_ "hover:text-blue-300"] "Browse" else "Browse"
-        mapM_ (\(path, padding, dir) -> p_ [class_ "text-xs"] $ do (toHtmlRaw padding) >> (a_ [class_ "hover:text-blue-300", href_ $ "/browse?path=" <> T.pack path] $ toHtmlRaw ("&#11169;&nbsp;" <> dir))) $ zip3 
+        mapM_ (\(path, padding, dir, index) -> p_ [class_ "text-sm"] $ do (toHtmlRaw padding) >> if index < length dirlist then (toHtmlRaw $ T.pack ("&#11169;&nbsp;")) <> (a_ [class_ "hover:text-blue-400", href_ $ "/browse?path=" <> T.pack path] $ toHtml dir) else span_ [class_ "text-zinc-500"] $ toHtmlRaw ("&#11169;&nbsp;" <> dir)) $ zip4
           (reverse $ mkPathList $ dirlist) 
           (mkPaddingList "&nbsp;" dirlist)
           (dirlist)
+          [1 .. length dirlist]
       if (isJust query_path) then div_ [class_ "items-end flex gap-x-2 [&_button]:text-slate-400 [&_button]:hover:text-slate-200 [&_button]:dark:bg-cyan-900 [&_button]:dark:hover:bg-cyan-700"] $ do
         button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
         button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
