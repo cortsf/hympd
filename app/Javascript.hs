@@ -80,13 +80,12 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        document.querySelector('#navVolume').value=stVolume 
                                      };
 
-                                     function setSongTitleOnPlayer (stSongID, stState) { 
-                                       console.log('This implementation only works on queue. ' + stSongID + '_' + stState)
-                                       //if(stState == "Stopped"){
-                                       //  document.querySelector('#currentSong').innerHTML='..';
-                                       //} else {
-                                       //  document.querySelector('#currentSong').innerHTML=document.querySelector("div.songId[data-songId='"+stSongID+"']").innerHTML;
-                                       //};
+                                     function setSongTitle (stState,  songTitle) { 
+                                       if(stState == "Stopped"){
+                                         document.querySelector('#currentSong').innerHTML='..';
+                                       } else {
+                                         document.querySelector('#currentSong').innerHTML=songTitle;
+                                       };
                                      };
 
                                      function highlightCurrentSongOnQueue (stSongID, stState) { 
@@ -117,7 +116,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        swapClass(status.stRepeat, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnRepeat'));
                                      };
 
-                                     function setUI (status) {
+                                     function setUI (status, songTitle) {
                                        setProgressInput(status.stTime, status.stState);
                                        setVolume(status.stVolume);
                                        setPlaybackState(status.stState);
@@ -125,7 +124,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        if(window.location.pathname == "/queue"){
                                         setQueueButtons(status);
                                        };
-                                       //setSongTitleOnPlayer(status.stSongID, status.stState);
+                                       setSongTitle(status.stState, songTitle);
                                      }
 
                                      ///////////////////////////////// Socket
@@ -141,12 +140,12 @@ jsblock = T.show $ renderJs $ [jmacro|
 
                                      socket.onmessage = function(event) {
                                        var msg_data = JSON.parse(event.data);
-                                       console.log('new_message: ' + JSON.stringify(msg_data));
+                                       // console.log('new_message: ' + JSON.stringify(msg_data));
                                        if(msg_data.payloadType == 'IdleUpdate'){
                                          if(msg_data.payload[0].includes("PlaylistS") && window.location.pathname == "/queue"){
                                            location.reload();
                                          }else{
-                                           setUI(msg_data.payload[1]);
+                                           setUI(msg_data.payload[1], msg_data.payload[2]);
                                          };
                                        } else if(msg_data.payloadType == 'ClientResponse'){
                                          setUI(msg_data.payload);

@@ -4,7 +4,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Stream where
 
-import Utility()
+-- import Utility ()
+import Utility (guessTitle)
 import Data.String (fromString)
 import Control.Monad.IO.Class
 import Control.Monad
@@ -86,7 +87,7 @@ parseCommandValue = do
 
 
 data ClientMessage = 
-  IdleUpdate [MPD.Subsystem] MPD.Status
+  IdleUpdate [MPD.Subsystem] MPD.Status (Maybe String)
   | ClientResponse MPD.Status
   | Error String
   deriving (Show, G.Generic)
@@ -104,12 +105,17 @@ streamData pc = do
     _  <- forkIO $ forever $ do 
       idle_subsystemsResponse <- MPD.withMPD $ MPD.idle [MPD.MixerS, MPD.PlayerS, MPD.PlaylistS, MPD.OptionsS]
       case idle_subsystemsResponse of
-        Left mpd_error -> sendMessage (Error $ show mpd_error) conn
+        Left mpd_error -> sendMessage (Error $ "Idle error: " <> show mpd_error) conn
         Right subsystems -> do
           idle_statusResponse <- liftIO $ MPD.withMPD $ MPD.status
           case idle_statusResponse of
-            Left status_error -> sendMessage (Error $ show status_error) conn
-            Right status -> sendMessage (IdleUpdate subsystems status) conn
+            Left status_error -> sendMessage (Error $ "Status error (idle): " <> show status_error) conn
+            Right status -> do
+              currentSong <- MPD.withMPD $ MPD.currentSong
+              case currentSong of
+                Left song_error -> sendMessage (Error $ "Song error (idle) " <> show song_error) conn
+                -- Right song -> sendMessage (IdleUpdate subsystems status (show <$> song)) conn
+                Right song -> sendMessage (IdleUpdate subsystems status (guessTitle <$> song)) conn
       pure ()
     forever $ do
       msg <- WS.receiveData conn :: IO T.Text
