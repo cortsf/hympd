@@ -77,4 +77,5 @@ runServer port = do
   runSettings settings =<< mkApp
 
 mkApp :: IO Application
-mkApp = return $ serve webApi server
+mkApp = do
+  pure $ serve webApi server

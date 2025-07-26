@@ -5,8 +5,27 @@ import Data.Text as T
 
 jsblock :: T.Text
 jsblock = T.show $ renderJs $ [jmacro| 
+                                     ///////////////////////////////// Global vars
                                      var refreshIntervalId;
                                      var currentTime = 0.0;
+
+                                     ///////////////////////////////// Utility
+                                     function swapClass (condition, fst_class, snd_class, node) {
+                                       if(condition){
+                                         // node.classList.remove(snd_class);
+                                         // node.classList.add(fst_class);
+                                         // node.classList.remove.apply(null, snd_class);
+                                         // node.classList.add.apply(null, fst_class);
+                                         node.classList.remove.apply(node.classList, snd_class);
+                                         node.classList.add.apply(node.classList, fst_class);
+                                       } else {
+                                         // node.classList.remove(fst_class);
+                                         // node.classList.add(snd_class);
+                                         node.classList.remove.apply(node.classList, fst_class);
+                                         node.classList.add.apply(node.classList, snd_class);
+                                       };
+                                     };
+
 
                                      function time_from_seconds(seconds){ 
                                        if(seconds > 3600){
@@ -15,6 +34,8 @@ jsblock = T.show $ renderJs $ [jmacro|
                                          return ('0'+Math.floor(seconds/60)%60).slice(-2)+':'+('0' + seconds % 60).slice(-2);
                                        };
                                      };
+
+                                     ///////////////////////////////// Set UI funs
 
                                      function setProgressInput (stTime, stState) {  
                                        progressBar = document.querySelector('#playerProgressInput');
@@ -89,7 +110,15 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        feather.replace(); 
                                      };
 
-                                     // SOCKET ////
+                                     function setQueueButtons (status) {
+                                       swapClass(status.stRandom, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnRandom'));
+                                       swapClass(status.stConsume, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnConsume'));
+                                       swapClass(status.stSingle, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnSingle'));
+                                       swapClass(status.stRepeat, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnRepeat'));
+                                     };
+
+                                     ///////////////////////////////// Socket
+
                                      socket = new WebSocket("ws://" + window.location.host + "/websocket");
                                      socket.onopen = function() {
                                        document.querySelector('#navPrevious').addEventListener('click', function() {socket.send('previous')}, false);
@@ -106,6 +135,9 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        setVolume(status.stVolume);
                                        setPlaybackState(status.stState);
                                        highlightCurrentSongOnQueue(status.stSongID, status.stState);
+                                       if(window.location.pathname == "/queue"){
+                                        setQueueButtons(status);
+                                       };
                                        //setSongTitleOnPlayer(status.stSongID, status.stState);
                                      };
 

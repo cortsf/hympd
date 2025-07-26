@@ -24,6 +24,10 @@ data Msg = Toggle
   | Previous 
   | Status 
   | Clear
+  | Random
+  | Repeat
+  | Single 
+  | Consume
   | Volume Int 
   | PlayId Int 
   | DeleteId Int 
@@ -42,7 +46,11 @@ parseCommand = do
              P.try (P.string "previous") P.<|> 
              P.try (P.string "next") P.<|>
              P.try (P.string "status") P.<|>
-             P.try (P.string "clear")
+             P.try (P.string "clear") P.<|>
+             P.try (P.string "random") P.<|>
+             P.try (P.string "repeat") P.<|>
+             P.try (P.string "single") P.<|>
+             P.try (P.string "consume")
   P.eof
   case command of
     "toggle" -> pure $ Toggle
@@ -51,6 +59,10 @@ parseCommand = do
     "next" -> pure $ Next
     "status" -> pure $ Status
     "clear" -> pure $ Clear
+    "random" -> pure $ Random
+    "repeat" -> pure $ Repeat
+    "single" -> pure $ Single
+    "consume" -> pure $ Consume
 
 parseCommandValue :: P.Parser Msg
 parseCommandValue = do
@@ -92,6 +104,22 @@ streamData pc = do
         (Right Previous, Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.previous) >> sendStatus js_request_status conn
         (Right Status, Right _js_request_status_nowrap) -> sendStatus js_request_status conn
         (Right Clear, Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.clear) >> sendStatus js_request_status conn
+        (Right Random, Right js_request_status_nowrap) -> do
+          liftIO $ MPD.withMPD $ MPD.random $ not $ MPD.stRandom $ js_request_status_nowrap
+          newStatus <- MPD.withMPD $ MPD.status
+          sendStatus newStatus conn
+        (Right Repeat, Right js_request_status_nowrap) -> do
+          liftIO $ MPD.withMPD $ MPD.repeat $ not $ MPD.stRepeat $ js_request_status_nowrap
+          newStatus <- MPD.withMPD $ MPD.status
+          sendStatus newStatus conn
+        (Right Single, Right js_request_status_nowrap) -> do
+          liftIO $ MPD.withMPD $ MPD.single $ not $ MPD.stSingle $ js_request_status_nowrap
+          newStatus <- MPD.withMPD $ MPD.status
+          sendStatus newStatus conn
+        (Right Consume, Right js_request_status_nowrap) -> do
+          liftIO $ MPD.withMPD $ MPD.consume $ not $ MPD.stConsume $ js_request_status_nowrap
+          newStatus <- MPD.withMPD $ MPD.status
+          sendStatus newStatus conn
         (Right (Volume v), Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.setVolume (fromIntegral v)) >> sendStatus js_request_status conn
         (Right (PlayId v), Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.playId (MPD.Id v)) >> sendStatus js_request_status conn
         (Right (DeleteId v), Right _js_request_status_nowrap) -> (liftIO $ MPD.withMPD $ MPD.deleteId (MPD.Id v)) >> sendStatus js_request_status conn
