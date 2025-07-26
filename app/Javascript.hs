@@ -81,9 +81,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      };
 
                                      function setSongTitle (stState,  songTitle) { 
-                                       if(stState == "Stopped"){
-                                         document.querySelector('#currentSong').innerHTML='..';
-                                       } else {
+                                       if(stState != "Stopped"){
                                          document.querySelector('#currentSong').innerHTML=songTitle;
                                        };
                                      };

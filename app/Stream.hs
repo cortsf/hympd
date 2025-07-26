@@ -104,82 +104,81 @@ streamData pc = do
     _  <- forkIO $ forever $ do 
       idle_subsystemsResponse <- MPD.withMPD $ MPD.idle [MPD.MixerS, MPD.PlayerS, MPD.PlaylistS, MPD.OptionsS]
       case idle_subsystemsResponse of
-        Left mpd_error -> sendMessage (Error $ "Idle error: " <> show mpd_error) conn
+        Left mpd_error -> sendError conn $ "Idle error: " <> show mpd_error
         Right subsystems -> do
-          idle_statusResponse <- liftIO $ MPD.withMPD $ MPD.status
-          case idle_statusResponse of
-            Left status_error -> sendMessage (Error $ "Status error (idle): " <> show status_error) conn
-            Right status -> sendData subsystems status conn
+          onStatus conn (sendData conn subsystems)
       pure ()
     forever $ do
       msg <- WS.receiveData conn :: IO T.Text
-      js_request_status <- liftIO $ MPD.withMPD $ MPD.status
       liftIO $ putStrLn "============="
       liftIO $ putStrLn $ T.unpack $ "action: '" <> msg <> "'"
       liftIO $ putStrLn $ "parsed action: '" <> (show $ parseMsg $ T.unpack msg) <> "'"
-      case (parseMsg $ T.unpack msg, js_request_status) of
-        (Right Status, Right js_request_status_nowrap) -> do
-          sendData [] js_request_status_nowrap conn
+      case parseMsg $ T.unpack msg of
+        Right Status -> do
+          onStatus conn (sendData conn [])
           pure ()
-        (Right Toggle, Right js_request_status_nowrap) -> do
-          (if MPD.stState js_request_status_nowrap == MPD.Stopped then (liftIO $ MPD.withMPD $ MPD.play Nothing) else  (liftIO $ MPD.withMPD $ MPD.toggle)) 
+        Right Toggle -> do
+          onStatus conn (\mpdStatus -> if MPD.stState mpdStatus == MPD.Stopped then (liftIO $ MPD.withMPD $ MPD.play Nothing) >> pure () else (liftIO $ MPD.withMPD $ MPD.toggle) >> pure ())
           pure ()
-        (Right Stop, Right _js_request_status_nowrap) -> do
+        Right Stop -> do
           (liftIO $ MPD.withMPD $ MPD.stop) 
           pure ()
-        (Right Next, Right _js_request_status_nowrap) -> do
+        Right Next -> do
           (liftIO $ MPD.withMPD $ MPD.next) 
           pure ()
-        (Right Previous, Right _js_request_status_nowrap) -> do
+        Right Previous -> do
           (liftIO $ MPD.withMPD $ MPD.previous) 
           pure ()
-        (Right Clear, Right _js_request_status_nowrap) -> do
+        Right Clear -> do
           (liftIO $ MPD.withMPD $ MPD.clear) 
           pure ()
-        (Right Random, Right js_request_status_nowrap) -> do
-          (liftIO $ MPD.withMPD $ MPD.random $ not $ MPD.stRandom $ js_request_status_nowrap) 
+        Right Random -> do
+          onStatus conn (\mpdStatus -> (liftIO $ MPD.withMPD $ MPD.random $ not $ MPD.stRandom mpdStatus) >> pure ())
           pure ()
-        (Right Repeat, Right js_request_status_nowrap) -> do
-          (liftIO $ MPD.withMPD $ MPD.repeat $ not $ MPD.stRepeat $ js_request_status_nowrap) 
+        Right Repeat -> do
+          onStatus conn (\mpdStatus -> (liftIO $ MPD.withMPD $ MPD.repeat $ not $ MPD.stRepeat $ mpdStatus) >> pure ())
           pure ()
-        (Right Single, Right js_request_status_nowrap) -> do
-          (liftIO $ MPD.withMPD $ MPD.single $ not $ MPD.stSingle $ js_request_status_nowrap) 
+        Right Single -> do
+          onStatus conn (\mpdStatus -> (liftIO $ MPD.withMPD $ MPD.single $ not $ MPD.stSingle $ mpdStatus) >> pure ())
           pure ()
-        (Right Consume, Right js_request_status_nowrap) -> do
-          (liftIO $ MPD.withMPD $ MPD.consume $ not $ MPD.stConsume $ js_request_status_nowrap) 
+        Right Consume -> do
+          onStatus conn (\mpdStatus -> (liftIO $ MPD.withMPD $ MPD.consume $ not $ MPD.stConsume $ mpdStatus) >> pure ())
           pure ()
-        (Right (Volume v), Right _js_request_status_nowrap) -> do
+        Right (Volume v) -> do
           (liftIO $ MPD.withMPD $ MPD.setVolume (fromIntegral v)) 
           pure ()
-        (Right (PlayId v), Right _js_request_status_nowrap) -> do
+        Right (PlayId v) -> do
           (liftIO $ MPD.withMPD $ MPD.playId (MPD.Id v)) 
           pure ()
-        (Right (DeleteId v), Right _js_request_status_nowrap) -> do
+        Right (DeleteId v) -> do
           (liftIO $ MPD.withMPD $ MPD.deleteId (MPD.Id v)) 
           pure ()
-        (Right (PlayPath v), Right _js_request_status_nowrap) -> do
+        Right (PlayPath v) -> do
           (liftIO $ MPD.withMPD $ MPD.clear) >> (liftIO $ MPD.withMPD $ MPD.add (fromString v)) >> (liftIO $ MPD.withMPD $ MPD.play Nothing) 
           pure ()
-        (Right (AddPath v), Right _js_request_status_nowrap) -> do
+        Right (AddPath v) -> do
           (liftIO $ MPD.withMPD $ MPD.add (fromString v)) 
           pure ()
-        (Right (SeekCur v), Right js_request_status_nowrap) -> do
-          case MPD.stTime js_request_status_nowrap of
-            Nothing -> (sendMessage (Error "Error: not playing") conn) >> pure ()
-            Just (_current_time, song_length) -> (liftIO $ MPD.withMPD $ MPD.seekCur True (((int2Double v)/100)*song_length)) >> pure ()
-        (Left parse_error, _) -> do
-          sendMessage (Error $ "Parse request error: " <> show parse_error) conn 
-          pure ()
-        (_, Left mpd_error) -> do
-          sendMessage (Error $ "MPD Error: " <> show mpd_error) conn 
+        Right (SeekCur v) -> do
+          onStatus conn (\mpdStatus -> maybe 
+                                       ((sendError conn $ "Error: not playing") >> pure ())
+                                       (\(_current_time, song_length) -> (liftIO $ MPD.withMPD $ MPD.seekCur True (((int2Double v)/100)*song_length)) >> pure ())
+                                       (MPD.stTime mpdStatus))
+        Left parse_error -> do
+          sendError conn $ "Parse request error: " <> show parse_error
           pure ()
   where
-    sendMessage msg conn = do
-      WS.sendTextData conn (A.encode msg)
-    sendData subsystems status conn = if ((MPD.stState status) /= MPD.Stopped) then do
+    onStatus conn fun = do
+      statusResponse <- liftIO $ MPD.withMPD $ MPD.status
+      case statusResponse of
+        Left _error -> sendError conn $ "Can't get MPD status"
+        Right status -> fun status
+    sendError conn error_msg = do
+      WS.sendTextData conn $ A.encode $ Error $ error_msg
+    sendData conn subsystems status = if ((MPD.stState status) /= MPD.Stopped) then do
       currentSong <- MPD.withMPD MPD.currentSong
       case currentSong of
-        Left song_error -> sendMessage (Error $ "Song error (idle) " <> show song_error) conn
-        Right song -> sendMessage (Payload subsystems status (guessTitle <$> song)) conn
+        Left song_error -> sendError conn $ "Song error (idle) " <> show song_error
+        Right song -> WS.sendTextData conn $ A.encode $ Payload subsystems status (guessTitle <$> song)
       else
-        sendMessage (Payload subsystems status Nothing) conn
+        WS.sendTextData conn $ A.encode $ Payload subsystems status Nothing
