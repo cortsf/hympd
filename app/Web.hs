@@ -46,7 +46,7 @@ page current_page content = do
       style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: oklch(55.6% 0 0); background-image: linear-gradient(#FFD6A8, #FFD6A8); background-size: " <> current_time <> "% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
     body_ [class_ "overflow-y-scroll flex flex-col bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400"] $ do
       nav_full current_page
-      div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
+      div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-teal-800"] $ do
         content
       script_ $ "feather.replace();"
       script_ $ jsblock

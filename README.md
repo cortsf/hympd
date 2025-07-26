@@ -1,1 +1,1 @@
-Mpd web client
+Mpd web interface
