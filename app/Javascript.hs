@@ -46,6 +46,8 @@ jsblock = T.show $ renderJs $ [jmacro|
                                          progressBar.disabled = true;
                                          progressBar.value=0;
                                          progressBar.style.backgroundSize = '0%';
+                                         document.querySelector('#elapsedTime').innerHTML="00:00";
+                                         document.querySelector('#totalTime').innerHTML="00:00";
                                        } else if (stState == "Paused"){
                                          clearInterval(refreshIntervalId);
                                          currentTime = stTime[0];
