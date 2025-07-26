@@ -14,7 +14,6 @@ import qualified Text.ParserCombinators.Parsec as P
 import qualified Network.WebSockets as WS
 import qualified Network.MPD as MPD
 import qualified Data.Text as T
--- import qualified Data.Text.Lazy.Encoding as TLE
 import qualified Data.Aeson as A
 import qualified GHC.Generics as G
 
