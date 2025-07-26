@@ -5,6 +5,8 @@ import Network.MPD qualified as MPD
 import Data.Aeson qualified as A 
 import GHC.Generics qualified as G
 import Data.Text qualified as T
+import Data.Time.Format
+import Data.Time.Clock.POSIX
 import System.FilePath.Posix qualified as FP
 import Data.Map.Strict qualified as C
 
@@ -28,6 +30,9 @@ infix 9 !!?
 
 guessTitle :: MPD.Song -> String
 guessTitle song = maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> maybe "No title metadata" (MPD.toString) (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags song))
+
+prettyTime :: Int -> String
+prettyTime seconds = formatTime defaultTimeLocale (if seconds  > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ seconds
 
 deriving instance G.Generic MPD.Status
 
