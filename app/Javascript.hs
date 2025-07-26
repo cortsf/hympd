@@ -90,7 +90,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      };
 
                                      function highlightCurrentSongOnQueue (stSongID, stState) { 
-                                       var current_class = 'text-blue-400';
+                                       var current_class = 'text-orange-100';
                                        if ( window.location.pathname == "/queue" ){
                                          if(stState == "Stopped"){
                                            document.querySelectorAll(".song-item").forEach(function(x){x.classList.remove(current_class)});
@@ -143,11 +143,15 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        var msg_data = JSON.parse(event.data);
                                        console.log('new_message: ' + JSON.stringify(msg_data));
                                        if(msg_data.payloadType == 'IdleUpdate'){
-                                         setUI(msg_data.payload[1]);
-                                       } else if(msg_data.payloadType == 'IdleUpdateError'){
+                                         if(msg_data.payload[0].includes("PlaylistS") && window.location.pathname == "/queue"){
+                                           location.reload();
+                                         }else{
+                                           setUI(msg_data.payload[1]);
+                                         };
                                        } else if(msg_data.payloadType == 'ClientResponse'){
                                          setUI(msg_data.payload);
-                                       } else if(msg_data.payloadType == 'ClientResponseError'){
+                                       } else if(msg_data.payloadType == 'Error'){
+                                         alert('ERROR: ' + msg_data.payload);
                                        };
                                      };
 

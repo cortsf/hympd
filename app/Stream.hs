@@ -4,6 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Stream where
 
+import Utility()
 import Data.String (fromString)
 import Control.Monad.IO.Class
 import Control.Monad
@@ -175,16 +176,3 @@ streamData pc = do
   where
     sendMessage msg conn = do
       WS.sendTextData conn (A.encode msg)
-
-deriving instance G.Generic MPD.Status
-
-instance A.ToJSON MPD.PlaybackState where
-  toJSON v = A.String $ T.pack $ show v
-
-instance A.ToJSON MPD.Volume where
-  toJSON v = A.String $ T.pack $ show $ toInteger v
-
-instance A.ToJSON MPD.Id where
-  toJSON (MPD.Id v) = A.String $ T.pack $ show v
-
-instance A.ToJSON MPD.Status
