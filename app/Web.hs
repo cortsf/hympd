@@ -32,11 +32,16 @@ data CurrentPage = Queue | Browse | Settings deriving Eq
 page :: CurrentPage -> Html () -> Handler (Html ())
 page current_page content = do
   mpdStatus <- liftIO $ MPD.withMPD $ MPD.status
+  currentSongResponse <- liftIO $ MPD.withMPD $ MPD.currentSong
   let current_time = case mpdStatus of
         Left _ -> "0"
         Right status -> case MPD.stTime status of
           Nothing -> "0"
           Just time -> T.pack $ show $ ((fst time / snd time) * 100)
+      songTitle = case currentSongResponse of
+        Left _ -> "&nbsp;"
+        Right Nothing -> "&nbsp;"
+        Right (Just song) -> guessTitle song
   pure $ html_ $ do
     head_ $ do
       title_ "Hympd"
@@ -45,34 +50,35 @@ page current_page content = do
       link_ [rel_ "icon", href_ "static/favicon1.png", sizes_ "any", type_ "image/png"]
       style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: oklch(55.6% 0 0); background-image: linear-gradient(#FFD6A8, #FFD6A8); background-size: " <> current_time <> "% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
     body_ [class_ "overflow-y-scroll flex flex-col bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400"] $ do
-      nav_full current_page
+      nav_full current_page songTitle
       div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
         content
       script_ $ "feather.replace();"
       script_ $ jsblock
 
-nav_full :: CurrentPage -> Html ()
-nav_full current_page = nav_ [class_ "sticky top-0 w-full dark:text-blue-200"] $ do
-  div_ [class_ "bg-gray-900 dark:bg-slate-700 w-full [&_.menuButton]:dark:hover:text-yellow-500"] $ do
-    div_ [class_ "max-w-screen-xl w-full flex flex-row place-content-between mx-auto pt-4 px-4"] $ do
-      div_ [class_ "hidden w-full md:block md:w-auto", id_ "navbar-default"] $ do
-        ul_ [class_ "font-medium flex flex-row space-x-8"] $ do
-          li_ $ a_ [href_ "/queue", classes_ [if current_page == Queue then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Queue"
-          li_ $ a_ [href_ "/browse", classes_ [if current_page == Browse then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Browse"
-          li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Settings"
-  div_ [class_ "bg-slate-600 dark:bg-slate-700 w-full mx-auto pb-2 pt-2"] $ do
-    div_ [class_ "px-8"] $ do
-      div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex place-content-between text-md pt-1 pb-2 text-lg"] $ do 
-        span_ [id_ "currentSong", class_ "text-orange-200 mr-4"] $ toHtmlRaw ("&nbsp;" :: T.Text)
-        div_ [class_ "flex space-x-4 text-orange-200 [&_.playerButton]:dark:hover:text-orange-400"] $ do
-          button_ [id_ "navPrevious", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-back", class_ "size-6"] ""
-          button_ [id_ "navStop", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "square", class_ "size-6"] ""
-          button_ [id_ "navPlayPause", class_ "playerButton cursor-pointer block"] $ i_  [data_ "feather" "play", class_ "size-6"] ""
-          button_ [id_ "navNext", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-forward", class_ "size-6"] ""
-          div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-orange-200 hover:bg-orange-400"]
-      div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 mt-0 pt-0"] $ do
-        div_ [class_ "grow"] $ input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
-        div_ [class_ "text-orange-200"] $ span_ [id_ "elapsedTime", class_ ""] "00:00" <> span_ [class_ "mx-1"] "/" <> span_ [id_ "totalTime", class_ ""] "00:00"
+nav_full :: CurrentPage -> String ->  Html ()
+nav_full current_page songTitle = do
+  nav_ [class_ "sticky top-0 w-full dark:text-blue-200"] $ do
+    div_ [class_ "bg-gray-900 dark:bg-slate-700 w-full [&_.menuButton]:dark:hover:text-yellow-500"] $ do
+      div_ [class_ "max-w-screen-xl w-full flex flex-row place-content-between mx-auto pt-4 px-4"] $ do
+        div_ [class_ "hidden w-full md:block md:w-auto", id_ "navbar-default"] $ do
+          ul_ [class_ "font-medium flex flex-row space-x-8"] $ do
+            li_ $ a_ [href_ "/queue", classes_ [if current_page == Queue then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Queue"
+            li_ $ a_ [href_ "/browse", classes_ [if current_page == Browse then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Browse"
+            li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Settings"
+    div_ [class_ "bg-slate-600 dark:bg-slate-700 w-full mx-auto pb-2 pt-2"] $ do
+      div_ [class_ "px-8"] $ do
+        div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex place-content-between text-md pt-1 pb-2 text-lg"] $ do 
+          span_ [id_ "currentSong", class_ "text-orange-200 mr-4"] $ toHtmlRaw songTitle
+          div_ [class_ "flex space-x-4 text-orange-200 [&_.playerButton]:dark:hover:text-orange-400"] $ do
+            button_ [id_ "navPrevious", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-back", class_ "size-6"] ""
+            button_ [id_ "navStop", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "square", class_ "size-6"] ""
+            button_ [id_ "navPlayPause", class_ "playerButton cursor-pointer block"] $ i_  [data_ "feather" "play", class_ "size-6"] ""
+            button_ [id_ "navNext", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-forward", class_ "size-6"] ""
+            div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-orange-200 hover:bg-orange-400"]
+        div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 mt-0 pt-0"] $ do
+          div_ [class_ "grow"] $ input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
+          div_ [class_ "text-orange-200"] $ span_ [id_ "elapsedTime", class_ ""] "00:00" <> span_ [class_ "mx-1"] "/" <> span_ [id_ "totalTime", class_ ""] "00:00"
 
 nav_compact :: CurrentPage -> Html ()
 nav_compact current_page = nav_ [class_ "sticky top-0 w-full bg-gray-900 dark:bg-gray-700 dark:text-blue-200 [&_.navItem]:dark:hover:text-yellow-600"] $ do

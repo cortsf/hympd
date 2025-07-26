@@ -115,6 +115,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      };
 
                                      function setUI (status, songTitle) {
+                                       setSongTitle(status.stState, songTitle);
                                        setProgressInput(status.stTime, status.stState);
                                        setVolume(status.stVolume);
                                        setPlaybackState(status.stState);
@@ -122,7 +123,6 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        if(window.location.pathname == "/queue"){
                                         setQueueButtons(status);
                                        };
-                                       setSongTitle(status.stState, songTitle);
                                      }
 
                                      ///////////////////////////////// Socket
