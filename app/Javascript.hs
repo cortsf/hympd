@@ -117,6 +117,17 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        swapClass(status.stRepeat, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnRepeat'));
                                      };
 
+                                     function setUI (status) {
+                                       setProgressInput(status.stTime, status.stState);
+                                       setVolume(status.stVolume);
+                                       setPlaybackState(status.stState);
+                                       highlightCurrentSongOnQueue(status.stSongID, status.stState);
+                                       if(window.location.pathname == "/queue"){
+                                        setQueueButtons(status);
+                                       };
+                                       //setSongTitleOnPlayer(status.stSongID, status.stState);
+                                     }
+
                                      ///////////////////////////////// Socket
 
                                      socket = new WebSocket("ws://" + window.location.host + "/websocket");
@@ -129,16 +140,15 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      };
 
                                      socket.onmessage = function(event) {
-                                       var status = JSON.parse(event.data);
-                                       // console.log('new_message: ' + JSON.stringify(status));
-                                       setProgressInput(status.stTime, status.stState);
-                                       setVolume(status.stVolume);
-                                       setPlaybackState(status.stState);
-                                       highlightCurrentSongOnQueue(status.stSongID, status.stState);
-                                       if(window.location.pathname == "/queue"){
-                                        setQueueButtons(status);
+                                       var msg_data = JSON.parse(event.data);
+                                       console.log('new_message: ' + JSON.stringify(msg_data));
+                                       if(msg_data.payloadType == 'IdleUpdate'){
+                                         setUI(msg_data.payload[1]);
+                                       } else if(msg_data.payloadType == 'IdleUpdateError'){
+                                       } else if(msg_data.payloadType == 'ClientResponse'){
+                                         setUI(msg_data.payload);
+                                       } else if(msg_data.payloadType == 'ClientResponseError'){
                                        };
-                                       //setSongTitleOnPlayer(status.stSongID, status.stState);
                                      };
 
                                      socket.onerror = function(error_msg) {

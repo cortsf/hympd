@@ -42,8 +42,7 @@ executable hympd
                     , containers
                     , parsec
                     , time
-                    , prettyprinter
                     , pretty-simple
-                    -- , safe
+                    , bytestring
     hs-source-dirs:   app
     default-language: GHC2024

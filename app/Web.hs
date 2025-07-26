@@ -42,7 +42,7 @@ page current_page content = do
       title_ "Hympd"
       script_ [src_ "static/styles.css"] ("" :: String)
       script_ [src_ "static/icons.js"] ("" :: String)
-      link_ [rel_ "icon", href_ "static/favicon4.png", sizes_ "any", type_ "image/png"]
+      link_ [rel_ "icon", href_ "static/favicon1.png", sizes_ "any", type_ "image/png"]
       style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: oklch(55.6% 0 0); background-image: linear-gradient(#FFD6A8, #FFD6A8); background-size: " <> current_time <> "% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
     body_ [class_ "overflow-y-scroll flex flex-col bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400"] $ do
       nav_full current_page
