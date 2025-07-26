@@ -4,7 +4,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Stream where
 
--- import Utility ()
 import Utility (guessTitle)
 import Data.String (fromString)
 import Control.Monad.IO.Class
@@ -87,8 +86,7 @@ parseCommandValue = do
 
 
 data ClientMessage = 
-  IdleUpdate [MPD.Subsystem] MPD.Status (Maybe String)
-  | ClientResponse MPD.Status
+  Payload [MPD.Subsystem] MPD.Status (Maybe String)
   | Error String
   deriving (Show, G.Generic)
 
@@ -96,7 +94,8 @@ deriving instance G.Generic MPD.Subsystem
 instance A.ToJSON MPD.Subsystem
 
 instance A.ToJSON ClientMessage where
-    toEncoding = A.genericToEncoding $ A.defaultOptions { A.sumEncoding = A.TaggedObject { tagFieldName = "payloadType", contentsFieldName = "payload" } }
+    toEncoding = A.genericToEncoding $ 
+      A.defaultOptions { A.sumEncoding = A.TaggedObject { tagFieldName = "payloadType", contentsFieldName = "payload" }}
 
 streamData :: MonadIO m => WS.PendingConnection -> m ()
 streamData pc = do
@@ -110,12 +109,7 @@ streamData pc = do
           idle_statusResponse <- liftIO $ MPD.withMPD $ MPD.status
           case idle_statusResponse of
             Left status_error -> sendMessage (Error $ "Status error (idle): " <> show status_error) conn
-            Right status -> do
-              currentSong <- MPD.withMPD $ MPD.currentSong
-              case currentSong of
-                Left song_error -> sendMessage (Error $ "Song error (idle) " <> show song_error) conn
-                -- Right song -> sendMessage (IdleUpdate subsystems status (show <$> song)) conn
-                Right song -> sendMessage (IdleUpdate subsystems status (guessTitle <$> song)) conn
+            Right status -> sendData subsystems status conn
       pure ()
     forever $ do
       msg <- WS.receiveData conn :: IO T.Text
@@ -124,8 +118,8 @@ streamData pc = do
       liftIO $ putStrLn $ T.unpack $ "action: '" <> msg <> "'"
       liftIO $ putStrLn $ "parsed action: '" <> (show $ parseMsg $ T.unpack msg) <> "'"
       case (parseMsg $ T.unpack msg, js_request_status) of
-        (Right Status, Right js_request_status_nowrap) ->do
-          liftIO $ sendMessage (ClientResponse js_request_status_nowrap) conn
+        (Right Status, Right js_request_status_nowrap) -> do
+          sendData [] js_request_status_nowrap conn
           pure ()
         (Right Toggle, Right js_request_status_nowrap) -> do
           (if MPD.stState js_request_status_nowrap == MPD.Stopped then (liftIO $ MPD.withMPD $ MPD.play Nothing) else  (liftIO $ MPD.withMPD $ MPD.toggle)) 
@@ -171,7 +165,7 @@ streamData pc = do
           pure ()
         (Right (SeekCur v), Right js_request_status_nowrap) -> do
           case MPD.stTime js_request_status_nowrap of
-            Nothing -> sendMessage (ClientResponse js_request_status_nowrap) conn >> pure ()
+            Nothing -> (sendMessage (Error "Error: not playing") conn) >> pure ()
             Just (_current_time, song_length) -> (liftIO $ MPD.withMPD $ MPD.seekCur True (((int2Double v)/100)*song_length)) >> pure ()
         (Left parse_error, _) -> do
           sendMessage (Error $ "Parse request error: " <> show parse_error) conn 
@@ -182,3 +176,10 @@ streamData pc = do
   where
     sendMessage msg conn = do
       WS.sendTextData conn (A.encode msg)
+    sendData subsystems status conn = if ((MPD.stState status) /= MPD.Stopped) then do
+      currentSong <- MPD.withMPD MPD.currentSong
+      case currentSong of
+        Left song_error -> sendMessage (Error $ "Song error (idle) " <> show song_error) conn
+        Right song -> sendMessage (Payload subsystems status (guessTitle <$> song)) conn
+      else
+        sendMessage (Payload subsystems status Nothing) conn

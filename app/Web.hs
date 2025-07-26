@@ -63,7 +63,7 @@ nav_full current_page = nav_ [class_ "sticky top-0 w-full dark:text-blue-200"] $
   div_ [class_ "bg-slate-600 dark:bg-slate-700 w-full mx-auto pb-2 pt-2"] $ do
     div_ [class_ "px-8"] $ do
       div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex place-content-between text-md pt-1 pb-2 text-lg"] $ do 
-        span_ [id_ "currentSong", class_ "text-orange-200 mr-4"] $ "Song Title, a very long one, you can see!"
+        span_ [id_ "currentSong", class_ "text-orange-200 mr-4"] $ ""
         div_ [class_ "flex space-x-4 text-orange-200 [&_.playerButton]:dark:hover:text-orange-400"] $ do
           button_ [id_ "navPrevious", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-back", class_ "size-6"] ""
           button_ [id_ "navStop", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "square", class_ "size-6"] ""

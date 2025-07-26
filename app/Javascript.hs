@@ -140,8 +140,8 @@ jsblock = T.show $ renderJs $ [jmacro|
 
                                      socket.onmessage = function(event) {
                                        var msg_data = JSON.parse(event.data);
-                                       // console.log('new_message: ' + JSON.stringify(msg_data));
-                                       if(msg_data.payloadType == 'IdleUpdate'){
+                                       console.log('new_message: ' + JSON.stringify(msg_data));
+                                       if(msg_data.payloadType == 'Payload'){
                                          if(msg_data.payload[0].includes("PlaylistS") && window.location.pathname == "/queue"){
                                            location.reload();
                                          }else{
