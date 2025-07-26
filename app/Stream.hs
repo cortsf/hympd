@@ -83,6 +83,7 @@ parseCommandValue = do
     "addPath" -> pure $ AddPath $ value
     "seekCur" -> pure $ SeekCur $ read value
 
+
 data ClientMessage = 
   IdleUpdate [MPD.Subsystem] MPD.Status
   | ClientResponse MPD.Status
@@ -100,9 +101,9 @@ streamData pc = do
   conn <- liftIO $ WS.acceptRequest pc
   liftIO $ WS.withPingThread conn 30 (return ()) $ do
     _  <- forkIO $ forever $ do 
-      idle_subsystemsResponse <- MPD.withMPD $ MPD.idle [MPD.MixerS, MPD.PlayerS, MPD.PlaylistS]
+      idle_subsystemsResponse <- MPD.withMPD $ MPD.idle [MPD.MixerS, MPD.PlayerS, MPD.PlaylistS, MPD.OptionsS]
       case idle_subsystemsResponse of
-        Left mpd_error -> sendMessage (Error $ show  mpd_error) conn
+        Left mpd_error -> sendMessage (Error $ show mpd_error) conn
         Right subsystems -> do
           idle_statusResponse <- liftIO $ MPD.withMPD $ MPD.status
           case idle_statusResponse of
