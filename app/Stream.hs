@@ -4,7 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Stream where
 
-import Utility (guessTitle)
+import Utility (guessTitle, withMpdOpt, Options(..))
 import Data.String (fromString)
 import Control.Monad.IO.Class
 import Control.Monad
@@ -96,12 +96,12 @@ instance A.ToJSON ClientMessage where
     toEncoding = A.genericToEncoding $ 
       A.defaultOptions { A.sumEncoding = A.TaggedObject { tagFieldName = "payloadType", contentsFieldName = "payload" }}
 
-streamData :: MonadIO m => WS.PendingConnection -> m ()
-streamData pc = do
+streamData :: MonadIO m => Options -> WS.PendingConnection -> m ()
+streamData options pc = do
   conn <- liftIO $ WS.acceptRequest pc
   liftIO $ WS.withPingThread conn 30 (return ()) $ do
     _  <- forkIO $ forever $ do 
-      idle_subsystemsResponse <- MPD.withMPD $ MPD.idle [MPD.MixerS, MPD.PlayerS, MPD.PlaylistS, MPD.OptionsS]
+      idle_subsystemsResponse <- withMpdOpt options $ MPD.idle [MPD.MixerS, MPD.PlayerS, MPD.PlaylistS, MPD.OptionsS]
       case idle_subsystemsResponse of
         Left mpd_error -> sendError conn $ "Idle error: " <> show mpd_error
         Right subsystems -> do

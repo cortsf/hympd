@@ -30,13 +30,13 @@ import System.FilePath.Posix qualified as FP
 
 data CurrentPage = Queue | Browse | Settings deriving Eq
 
-page :: CurrentPage -> Html () -> Handler (Html ())
-page current_page content = do
-  mpdStatus <- liftIO $ MPD.withMPD $ MPD.status
+page :: Options -> CurrentPage -> Html () -> Handler (Html ())
+page options current_page content = do
+  mpdStatus <- liftIO $ withMpdOpt options $ MPD.status
   case mpdStatus of
     Left e -> pure $ p_ $ toHtml $ "Error - Can't connect to MPD: "  <> show e
     Right status -> do
-      currentSongResponse <- liftIO $ MPD.withMPD $ MPD.currentSong
+      currentSongResponse <- liftIO $ withMpdOpt options $ MPD.currentSong
       let current_time_percentage = maybe "0" (\time -> T.pack $ show $ ((fst time / snd time) * 100)) (MPD.stTime status)
           elapsed_time = maybe "0"  
             (prettyTime . double2Int . fst)
@@ -115,10 +115,10 @@ nav_compact current_page = nav_ [class_ "sticky top-0 w-full bg-gray-900 dark:bg
 -- Individual Pages
 ------------------------------------------------------------
 
-queuePage :: Handler (Html ())
-queuePage = do
-  playlist <- liftIO $ MPD.withMPD $ MPD.playlistInfo Nothing
-  page Queue $ do
+queuePage :: Options -> Handler (Html ())
+queuePage options = do
+  playlist <- liftIO $ withMpdOpt options $ MPD.playlistInfo Nothing
+  page options Queue $ do
     div_ [class_ "flex place-content-between ml-4 mr-2"] $ do
       span_ [class_ "text-2xl"] $ "Queue"
       div_ [class_ "flex gap-x-2"] $ do
@@ -144,11 +144,11 @@ queuePage = do
                        ) pl
 
 
-browsePage :: Maybe String -> Handler (Html ())
-browsePage query_path = do
+browsePage :: Options -> Maybe String -> Handler (Html ())
+browsePage options query_path = do
   let dirlist = FP.splitDirectories $ maybe "" (fromString . id) query_path
-  mpdResult <- liftIO $ MPD.withMPD $ MPD.lsInfo $ maybe "" (fromString . id) query_path
-  page Browse $ do
+  mpdResult <- liftIO $ withMpdOpt options $ MPD.lsInfo $ maybe "" (fromString . id) query_path
+  page options Browse $ do
     div_ [class_ "flex place-content-between ml-4 mr-2"] $ do
       div_ [class_ "place-content-start"] $ do
         span_ [class_ "text-2xl"] $ if isJust query_path then a_ [href_ "/browse", class_ "hover:text-blue-300"] "Browse" else "Browse"
@@ -213,10 +213,10 @@ browsePage query_path = do
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
       button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
 
-settingsPage :: Handler (Html ())
-settingsPage = do
-  mpdStatus <- liftIO $ MPD.withMPD $ MPD.status
-  page Settings $ do
+settingsPage :: Options -> Handler (Html ())
+settingsPage options = do
+  mpdStatus <- liftIO $ withMpdOpt options $ MPD.status
+  page options Settings $ do
     p_ [class_ "text-2xl ml-4"] "Settings"
     div_ [class_ "mt-4 p-4"] $ pre_ $ toHtml $ either P.pShowNoColor P.pShowNoColor mpdStatus
 

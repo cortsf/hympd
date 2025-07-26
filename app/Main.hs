@@ -14,6 +14,7 @@
 module Main where
 import Web 
 import Stream
+import Utility
 
 import Network.Wai
 import Network.Wai.Handler.Warp
@@ -24,27 +25,41 @@ import Servant.HTML.Lucid
 import Servant.API.WebSocket
 import Options.Applicative
 
-data Config = Config
-  { port :: Int
-  }
-  deriving (Show)
 
-parseArgs :: IO Config
+parseArgs :: IO Options
 parseArgs = execParser $ info confParser (progDesc "Hympd: MPD web client")
 
-confParser :: Parser Config
+confParser :: Parser Options
 confParser = do
   port <-
     option auto $
       long "port"
         <> metavar "INT"
         <> help "port (web interface)"
-  pure $ Config {..}
+  mpdHost <-
+    strOption $
+      long "mpd-host"
+        <> metavar "STRING"
+        <> value "localhost"
+        <> help "MPD host"
+  mpdPort <-
+    option auto $
+      long "mpd-port"
+        <> metavar "INT"
+        <> value 6600
+        <> help "MPD port"
+  mpdPass <-
+    strOption $
+      long "mpd-password"
+        <> metavar "STRING"
+        <> value ""
+        <> help "MPD password"
+  pure $ Options {..}
 
 main :: IO ()
 main = do
   args <- parseArgs
-  runServer $ port args
+  runServer $ args
 
 -- * api
 
@@ -60,22 +75,22 @@ webApi = Proxy
 
 -- * app
 
-server :: Server WebApi
-server = queuePage :<|> 
-         browsePage :<|> 
-         settingsPage :<|> 
-         streamData :<|> 
+server :: Options -> Server WebApi
+server options = (queuePage options) :<|> 
+         (browsePage options) :<|> 
+         (settingsPage options) :<|> 
+         (streamData options) :<|> 
          (serveDirectoryWebApp "static")
 
 
-runServer :: Int -> IO ()
-runServer port = do
+runServer :: Options -> IO ()
+runServer options = do
   let settings =
-        setPort port $
-        setBeforeMainLoop (hPutStrLn stderr ("Listening on port " ++ show port)) $
+        setPort (port options) $
+        setBeforeMainLoop (hPutStrLn stderr ("Listening on port " ++ show (port options))) $
         defaultSettings
-  runSettings settings =<< mkApp
+  runSettings settings =<< (mkApp options)
 
-mkApp :: IO Application
-mkApp = do
-  pure $ serve webApi server
+mkApp :: Options -> IO Application
+mkApp options = do
+  pure $ serve webApi (server options)

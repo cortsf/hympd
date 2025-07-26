@@ -13,6 +13,18 @@ import Data.Map.Strict qualified as C
 data SongList = SongList { songId :: Int, songName :: String } deriving G.Generic
 instance A.ToJSON SongList
 
+data Options = Options
+  { port :: Int
+  , mpdHost :: String
+  , mpdPort :: Integer
+  , mpdPass :: String
+  }
+  deriving (Show)
+
+
+withMpdOpt :: Options -> MPD.MPD a -> IO (MPD.Response a)
+withMpdOpt options = MPD.withMPDEx (mpdHost options) (mpdPort options) (mpdPass options)
+
 unId :: MPD.Id -> Int
 unId (MPD.Id n) = n
 
