@@ -44,5 +44,6 @@ executable hympd
                     , time
                     , pretty-simple
                     , bytestring
+                    , uri-encode
     hs-source-dirs:   app
     default-language: GHC2024

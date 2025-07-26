@@ -18,6 +18,7 @@ import Data.Coerce (coerce)
 import Lucid
 import Servant (Handler)
 import GHC.Generics
+import Network.URI.Encode qualified as U
 import Data.Text qualified as T
 import Text.Pretty.Simple qualified as P
 import Network.MPD qualified as MPD
@@ -174,7 +175,7 @@ browsePage options query_path = do
                              MPD.LsDirectory path -> do
                                mkIconField "folder"
                                td_ [class_ "pl-4 py-0 overflow-hidden grow cursor-pointer flex"] $ do
-                                 a_ [href_ (("/browse?path=" :: T.Text) <> (MPD.toText path)), class_ "py-2 grow w-full h-full"] $ toHtml $ fromMaybe "__" ((FP.splitDirectories $ MPD.toString path) !!? (( length $ FP.splitDirectories $ MPD.toString path ) - 1))
+                                 a_ [href_ (("/browse?path=" :: T.Text) <> (U.encodeText $ MPD.toText path)), class_ "py-2 grow w-full h-full"] $ toHtml $ fromMaybe "__" ((FP.splitDirectories $ MPD.toString path) !!? (( length $ FP.splitDirectories $ MPD.toString path ) - 1))
                                mkQueueButtons(T.pack $ MPD.toString path)
                              MPD.LsSong song -> do
                                mkIconField "music"
