@@ -31,7 +31,7 @@ jsblock = T.show $ renderJs $ [jmacro|
 
                                      ///////////////////////////////// Set UI funs
 
-                                     function setProgressInput (stTime, stState) {  
+                                     function setProgress (stTime, stState) {  
                                        progressBar = document.querySelector('#playerProgressInput');
                                        
                                        if(stState == "Stopped"){
@@ -112,7 +112,7 @@ jsblock = T.show $ renderJs $ [jmacro|
 
                                      function setUI (status, songTitle) {
                                        setSongTitle(status.stState, songTitle);
-                                       setProgressInput(status.stTime, status.stState);
+                                       setProgress(status.stTime, status.stState);
                                        setVolume(status.stVolume);
                                        setPlaybackState(status.stState);
                                        highlightCurrentSongOnQueue(status.stSongID, status.stState);
