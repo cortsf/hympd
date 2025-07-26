@@ -12,15 +12,9 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      ///////////////////////////////// Utility
                                      function swapClass (condition, fst_class, snd_class, node) {
                                        if(condition){
-                                         // node.classList.remove(snd_class);
-                                         // node.classList.add(fst_class);
-                                         // node.classList.remove.apply(null, snd_class);
-                                         // node.classList.add.apply(null, fst_class);
                                          node.classList.remove.apply(node.classList, snd_class);
                                          node.classList.add.apply(node.classList, fst_class);
                                        } else {
-                                         // node.classList.remove(fst_class);
-                                         // node.classList.add(snd_class);
                                          node.classList.remove.apply(node.classList, fst_class);
                                          node.classList.add.apply(node.classList, snd_class);
                                        };
