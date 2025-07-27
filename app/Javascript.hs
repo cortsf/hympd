@@ -6,10 +6,12 @@ import Data.Text as T
 jsblock :: T.Text
 jsblock = T.show $ renderJs $ [jmacro| 
                                      ///////////////////////////////// Global vars
+
                                      var refreshIntervalId;
                                      var currentTime = 0.0;
 
                                      ///////////////////////////////// Utility
+
                                      function swapClass (condition, fst_class, snd_class, node) {
                                        if(condition){
                                          node.classList.remove.apply(node.classList, snd_class);

@@ -59,7 +59,7 @@ page options current_page content = do
           script_ [src_ "static/icons.js"] ("" :: String)
           link_ [rel_ "icon", href_ "static/favicon1.png", sizes_ "any", type_ "image/png"]
           style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: oklch(55.6% 0 0); background-image: linear-gradient(#FFD6A8, #FFD6A8); background-size: " <> current_time_percentage <> "% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
-        body_ [class_ "overflow-y-scroll flex flex-col bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400"] $ do
+        body_ [class_ "overflow-y-scroll flex flex-col bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400 text-2xl lg:text-base"] $ do
           nav_full current_page songTitle volume elapsed_time total_time playPause_icon
           div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
             content
@@ -68,15 +68,13 @@ page options current_page content = do
 
 nav_full :: CurrentPage -> String -> Integer -> String -> String -> String -> Html ()
 nav_full current_page songTitle volume elapsed_time total_time playPause_icon = do
-  nav_ [class_ "sticky top-0 w-full dark:text-blue-200"] $ do
-    div_ [class_ "bg-gray-900 dark:bg-slate-700 w-full [&_.menuButton]:dark:hover:text-yellow-500"] $ do
-      div_ [class_ "max-w-screen-xl w-full flex flex-row place-content-between mx-auto pt-4 px-4"] $ do
-        div_ [class_ "hidden w-full md:block md:w-auto", id_ "navbar-default"] $ do
-          ul_ [class_ "font-medium flex flex-row space-x-8"] $ do
-            li_ $ a_ [href_ "/queue", classes_ [if current_page == Queue then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Queue"
-            li_ $ a_ [href_ "/browse", classes_ [if current_page == Browse then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Browse"
-            li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Settings"
-    div_ [class_ "bg-slate-600 dark:bg-slate-700 w-full mx-auto pb-2 pt-2"] $ do
+  nav_ [class_ "sticky top-0 w-full dark:text-blue-200 bg-slate-700 "] $ do
+    div_ [class_ "max-w-screen-xl w-full flex block mx-auto py-12 lg:pt-4 lg:pb-0 px-2 md:px-4 [&_.menuButton]:dark:hover:text-yellow-500"] $ do
+      ul_ [class_ "font-medium flex flex-row space-x-8 w-full bg-red-200 place-content-between lg:place-content-start"] $ do
+        li_ $ a_ [href_ "/queue", classes_ [if current_page == Queue then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm md:bg-transparent md:p-0"]] "Queue"
+        li_ $ a_ [href_ "/browse", classes_ [if current_page == Browse then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm md:bg-transparent md:p-0"]] "Browse"
+        li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm md:bg-transparent md:p-0"]] "Settings"
+    div_ [class_ "w-full mx-auto pb-2 pt-2"] $ do
       div_ [class_ "px-8"] $ do
         div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex place-content-between text-md pt-1 pb-2 text-lg"] $ do 
           span_ [id_ "currentSong", class_ "text-orange-200 mr-4"] $ toHtmlRaw songTitle
