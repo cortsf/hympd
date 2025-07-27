@@ -72,9 +72,9 @@ nav_full current_page songTitle volume elapsed_time total_time playPause_icon = 
   nav_ [class_ "sticky top-0 w-full dark:text-blue-200 bg-slate-700 "] $ do
     div_ [class_ "max-w-screen-xl w-full flex block mx-auto pt-4 px-2 lg:px-4 [&_.menuButton]:dark:hover:text-yellow-500"] $ do
       ul_ [class_ "font-medium flex flex-row space-x-8 w-full place-content-between lg:place-content-start"] $ do
-        li_ $ a_ [href_ "/queue", classes_ [if current_page == Queue then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:bg-transparent lg:p-0"]] "Queue"
-        li_ $ a_ [href_ "/browse", classes_ [if current_page == Browse then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:bg-transparent lg:p-0"]] "Browse"
-        li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:bg-transparent lg:p-0"]] "Settings"
+        li_ $ a_ [href_ "/queue", classes_ [if current_page == Queue then "text-yellow-500" else "hover:text-blue-200 text-blue-200 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:p-0"]] "Queue"
+        li_ $ a_ [href_ "/browse", classes_ [if current_page == Browse then "text-yellow-500" else "hover:text-blue-200 text-blue-200 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:p-0"]] "Browse"
+        li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-200 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:p-0"]] "Settings"
     div_ [class_ "w-full mx-auto pb-2 pt-2"] $ do
       div_ [class_ "px-2"] $ do
         div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex flex-col md:flex-row place-content-between text-md pt-1 pb-2"] $ do 
