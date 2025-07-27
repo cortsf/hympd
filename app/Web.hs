@@ -60,7 +60,7 @@ page options current_page content = do
           link_ [rel_ "icon", href_ "static/favicon1.png", sizes_ "any", type_ "image/png"]
           style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: oklch(55.6% 0 0); background-image: linear-gradient(#FFD6A8, #FFD6A8); background-size: " <> current_time_percentage <> "% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
           meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1.0"]
-        body_ [class_ "overflow-y-scroll flex flex-col bg-blue-200 dark:bg-gray-900 focus:outline-none dark:text-slate-400 text-xl lg:text-base"] $ do
+        body_ [class_ "overflow-y-scroll flex flex-col bg-white dark:bg-gray-900 focus:outline-none dark:text-slate-400 text-xl lg:text-base wrap-anywhere"] $ do
           nav_full current_page songTitle volume elapsed_time total_time playPause_icon
           div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
             content
@@ -77,17 +77,17 @@ nav_full current_page songTitle volume elapsed_time total_time playPause_icon = 
         li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:bg-transparent lg:p-0"]] "Settings"
     div_ [class_ "w-full mx-auto pb-2 pt-2"] $ do
       div_ [class_ "px-2"] $ do
-        div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex place-content-between text-md pt-1 pb-2"] $ do 
-          span_ [id_ "currentSong", class_ "text-orange-200 mr-4 lg:text-lg"] $ toHtmlRaw songTitle
-          div_ [class_ "flex space-x-4 text-orange-200 [&_.playerButton]:dark:hover:text-orange-400"] $ do
+        div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex flex-col md:flex-row place-content-between text-md pt-1 pb-2"] $ do 
+          div_ [id_ "currentSong", class_ "text-orange-200 lg:text-lg truncate"] $ toHtmlRaw songTitle
+          div_ [class_ "flex space-x-4 mt-4 lg:mt-0 text-orange-200 [&_.playerButton]:dark:hover:text-orange-400"] $ do
             button_ [id_ "navPrevious", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-back", class_ "size-6"] ""
             button_ [id_ "navStop", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "square", class_ "size-6"] ""
             button_ [id_ "navPlayPause", class_ "playerButton cursor-pointer block"] $ i_  [data_ "feather" (T.pack playPause_icon), class_ "size-6"] ""
             button_ [id_ "navNext", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-forward", class_ "size-6"] ""
             div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ $ T.pack $ show volume, class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-orange-200 hover:bg-orange-400"]
-        div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 mt-0 pt-0"] $ do
+        div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 my-4 lg:my-0 lg:pt-0"] $ do
           div_ [class_ "grow"] $ input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
-          div_ [class_ "text-orange-200"] $ span_ [id_ "elapsedTime", class_ ""] (toHtml elapsed_time) <> span_ [class_ "mx-1"] "/" <> span_ [id_ "totalTime", class_ ""] (toHtml total_time)
+          div_ [class_ "text-orange-200 hidden md:block"] $ span_ [id_ "elapsedTime", class_ ""] (toHtml elapsed_time) <> span_ [class_ "mx-1"] "/" <> span_ [id_ "totalTime", class_ ""] (toHtml total_time)
 
 nav_compact :: CurrentPage -> Html ()
 nav_compact current_page = nav_ [class_ "sticky top-0 w-full bg-gray-900 dark:bg-gray-700 dark:text-blue-200 [&_.navItem]:dark:hover:text-yellow-600"] $ do
