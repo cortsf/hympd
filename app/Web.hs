@@ -57,7 +57,7 @@ page options current_page content = do
           title_ "Hympd!!"
           script_ [src_ "/static/styles.css"] ("" :: String)
           script_ [src_ "/static/icons.js"] ("" :: String)
-          link_ [rel_ "icon", href_ "/static/favicon.png", sizes_ "any", type_ "image/png"]
+          link_ [rel_ "icon", href_ "/static/favicon11.png?v=5", sizes_ "any", type_ "image/png"]
           link_ [rel_ "manifest", href_ "/static/manifest.json"]
           style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: oklch(55.6% 0 0); background-image: linear-gradient(#FFD6A8, #FFD6A8); background-size: " <> current_time_percentage <> "% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
           meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1.0"]
@@ -87,31 +87,9 @@ nav_full current_page songTitle volume elapsed_time total_time playPause_icon = 
             button_ [id_ "navPlayPause", class_ "playerButton cursor-pointer block"] $ i_  [data_ "feather" (T.pack playPause_icon), class_ "size-6"] ""
             button_ [id_ "navNext", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-forward", class_ "size-6"] ""
             div_ [class_ "flex items-center w-full"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ $ T.pack $ show volume, class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-orange-200 hover:bg-orange-400"]
-        div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 my-4 lg:my-0 lg:pt-0"] $ do
+        div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 my-2 lg:my-0 lg:pt-0"] $ do
           div_ [class_ "grow"] $ input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
-          div_ [class_ "text-orange-200 hidden md:block"] $ span_ [id_ "elapsedTime", class_ ""] (toHtml elapsed_time) <> span_ [class_ "mx-1"] "/" <> span_ [id_ "totalTime", class_ ""] (toHtml total_time)
-
-nav_compact :: CurrentPage -> Html ()
-nav_compact current_page = nav_ [class_ "sticky top-0 w-full bg-gray-900 dark:bg-gray-700 dark:text-blue-200 [&_.navItem]:dark:hover:text-yellow-600"] $ do
-  div_ [class_ "max-w-screen-xl w-full flex flex-row mx-auto"] $ do
-    div_ [class_ "flex mx-auto lg:pt-4 px-4 h-full mr-20"] $ do
-        div_ [class_ "hidden w-full md:block md:w-auto", id_ "navbar-default"] $ do
-          ul_ [class_ "font-medium flex flex-row space-x-8"] $ do
-            li_ $ a_ [href_ "/queue", classes_ [if current_page == Queue then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Queue"
-            li_ $ a_ [href_ "/browse", classes_ [if current_page == Browse then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Browse"
-            li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-500 dark:text-blue-200 navItem", "block py-2 px-3 bg-blue-700 rounded-sm md:bg-transparent md:p-0"]] "Settings"
-    div_ [class_ "w-full mx-auto pt-2 pb-4 px-4 flex flex-col"] $ do
-      div_ [class_ "flex space-x-4 "] $ do
-        div_ [class_ "max-w-screen-xl w-full mx-auto"] $ do 
-          p_ [id_ "currentSong", class_ "text-md text-blue-200"] $ "Song Title"
-        button_ [id_ "navPrevious", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-back"] ""
-        button_ [id_ "navStop", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "square"] ""
-        button_ [id_ "navPlayPause", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200 focus:text-blue-200"] $ i_  [data_ "feather" "play"] ""
-        button_ [id_ "navNext", class_ "navItem cursor-pointer block bg-blue-200 rounded-sm md:bg-transparent hover:text-blue-200"] $ i_ [data_ "feather" "skip-forward"] ""
-        div_ [class_ "flex items-center"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ "0", class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-blue-200"]
-      div_ [class_ "max-w-screen-xl w-full flex items-center justify-between mx-auto mt-2"] $ do
-          input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "h-2 mt-1 w-full h-1 bg-gray-600 rounded-lg cursor-pointer dark:bg-slate-800"]
-
+          div_ [class_ "text-orange-200 hidden sm:block"] $ span_ [id_ "elapsedTime", class_ ""] (toHtml elapsed_time) <> span_ [class_ "mx-1"] "/" <> span_ [id_ "totalTime", class_ ""] (toHtml total_time)
 
 ------------------------------------------------------------
 -- Individual Pages
@@ -153,7 +131,7 @@ browsePage options query_path = do
   page options Browse $ do
     div_ [class_ "flex flex-col md:flex-row place-content-between ml-4 mr-2"] $ do
       div_ [class_ "place-content-start"] $ do
-        span_ [class_ "text-2xl"] $ if isJust query_path then a_ [href_ "/browse", class_ "hover:text-blue-400"] "Browse" else "Browse"
+        span_ [class_ "text-2xl"] $ "Browse"
         mapM_ (\(path, padding, dir, index) -> 
                     if index < length dirlist then p_ [class_ "text-sm truncate"] $ (toHtmlRaw padding) <>  (a_ [class_ "text-blue-400 dark:text-slate-400 hover:dark:text-blue-400", href_ $ "/browse?path=" <> T.pack path] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir)
                     else p_ [class_ "text-sm"] $ (toHtmlRaw padding) <> (span_ [class_ "text-lime-400"] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir)
