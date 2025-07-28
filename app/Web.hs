@@ -121,13 +121,13 @@ queuePage :: Options -> Handler (Html ())
 queuePage options = do
   playlist <- liftIO $ withMpdOpt options $ MPD.playlistInfo Nothing
   page options Queue $ do
-    div_ [class_ "flex place-content-between ml-4 mr-2"] $ do
+    div_ [class_ "flex ml-4 mr-2"] $ do
       span_ [class_ "text-2xl"] $ "Queue"
-      div_ [class_ "flex gap-x-2"] $ do
-        button_ [onclick_ "socket.send('consume')", id_ "btnConsume", class_ "px-2 py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "file-minus"] "" <> span_ [class_ "ml-1"] "Consume")
-        button_ [onclick_ "socket.send('single')", id_ "btnSingle", class_ "px-2 py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "star"] "" <> span_ [class_ "ml-1"] "Single")
-        button_ [onclick_ "socket.send('random')", id_ "btnRandom", class_ "px-2 py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "shuffle"] "" <> span_ [class_ "ml-1"] "Random")
-        button_ [onclick_ "socket.send('repeat')", id_ "btnRepeat", class_ "px-2 py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "repeat"] "" <> span_ [class_ "ml-1"] "Repeat")
+    div_ [class_ "flex gap-x-1 md:gap-x-6 place-content-between lg:place-content-end ml-2 text-xs md:text-base mt-4 lg:mt-0"] $ do
+        button_ [onclick_ "socket.send('consume')", id_ "btnConsume", class_ "py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "file-minus"] "" <> span_ [class_ "ml-1"] "Consume")
+        button_ [onclick_ "socket.send('single')", id_ "btnSingle", class_ "py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "star"] "" <> span_ [class_ "ml-1"] "Single")
+        button_ [onclick_ "socket.send('random')", id_ "btnRandom", class_ "py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "shuffle"] "" <> span_ [class_ "ml-1"] "Random")
+        button_ [onclick_ "socket.send('repeat')", id_ "btnRepeat", class_ "py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "repeat"] "" <> span_ [class_ "ml-1"] "Repeat")
         button_ [onclick_ "socket.send('clear')", class_ "px-2 py-1 rounded-md cursor-pointer flex items-center text-slate-400 hover:text-slate-200"] (i_ [class_ "size-5 stroke-2", data_ "feather" "file"] "" <> span_ [class_ "ml-1"] "Clear")
     case playlist of
       Left _ -> p_ "playlist error"
@@ -155,18 +155,17 @@ browsePage options query_path = do
       div_ [class_ "place-content-start"] $ do
         span_ [class_ "text-2xl"] $ if isJust query_path then a_ [href_ "/browse", class_ "hover:text-blue-400"] "Browse" else "Browse"
         mapM_ (\(path, padding, dir, index) -> 
-                 p_ [class_ "text-sm"] $ (toHtmlRaw padding) >> 
-                    if index < length dirlist then a_ [class_ "text-blue-400 dark:text-slate-400 hover:dark:text-blue-400", href_ $ "/browse?path=" <> T.pack path] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir
-                    else span_ [class_ "text-lime-400"] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir
+                    if index < length dirlist then p_ [class_ "text-sm truncate"] $ (toHtmlRaw padding) <>  (a_ [class_ "text-blue-400 dark:text-slate-400 hover:dark:text-blue-400", href_ $ "/browse?path=" <> T.pack path] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir)
+                    else p_ [class_ "text-sm"] $ (toHtmlRaw padding) <> (span_ [class_ "text-lime-400"] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir)
               ) $ zip4 (reverse $ mkPathList $ dirlist) (mkPaddingList "&nbsp;" dirlist) (dirlist)
           [1 .. length dirlist]
       case query_path of
         Just (_x:_xs) -> do
-          div_ [class_ "mt-4 md:mt-4 lg:items-end items-center flex gap-x-2 [&_button]:text-slate-400 [&_button]:hover:text-slate-200"] $ do
-            button_ [onclick_ $ "location.href='/browse" <> (if length dirlist > 1 then T.pack $ "?path=" <> (mconcat $ intersperse "/" (init dirlist)) else "") <> "'", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "corner-left-up"] "" <> span_ [class_ "ml-1"] "Up")
-            button_ [onclick_ $ "location.href='/browse'", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "chevrons-up"] "" <> span_ [class_ "ml-1"] "Top")
-            button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
-            button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "px-2 py-1 rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
+          div_ [class_ "mt-4 md:mt-4 lg:items-end items-center flex place-content-around lg:place-content-end md:gap-x-6 [&_button]:text-slate-400 [&_button]:hover:text-slate-200"] $ do
+            button_ [onclick_ $ "location.href='/browse" <> (if length dirlist > 1 then T.pack $ "?path=" <> (mconcat $ intersperse "/" (init dirlist)) else "") <> "'", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "corner-left-up"] "" <> span_ [class_ "ml-1"] "Up")
+            button_ [onclick_ $ "location.href='/browse'", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "chevrons-up"] "" <> span_ [class_ "ml-1"] "Top")
+            button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
+            button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
         _ -> div_ ""
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
