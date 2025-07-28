@@ -133,7 +133,7 @@ browsePage options query_path = do
       div_ [class_ "place-content-start"] $ do
         span_ [class_ "text-2xl"] $ "Browse"
         mapM_ (\(path, padding, dir, index) -> 
-                    if index < length dirlist then p_ [class_ "text-sm truncate"] $ (toHtmlRaw padding) <>  (a_ [class_ "text-blue-400 dark:text-slate-400 hover:dark:text-blue-400", href_ $ "/browse?path=" <> T.pack path] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir)
+                    if index < length dirlist then p_ [class_ "text-sm truncate"] $ (toHtmlRaw padding) <>  (a_ [class_ "text-blue-400 dark:text-slate-400 hover:dark:text-blue-400", href_ $ "/browse?path=" <> (U.encodeText $ T.pack path)] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir)
                     else p_ [class_ "text-sm"] $ (toHtmlRaw padding) <> (span_ [class_ "text-lime-400"] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir)
               ) $ zip4 (reverse $ mkPathList $ dirlist) (mkPaddingList "&nbsp;" dirlist) (dirlist)
           [1 .. length dirlist]
