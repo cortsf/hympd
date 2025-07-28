@@ -29,6 +29,7 @@ executable hympd
                     , servant-websockets
                     , servant-lucid
                     , warp
+                    , warp-tls
                     , wai
                     , conduit
                     , websockets

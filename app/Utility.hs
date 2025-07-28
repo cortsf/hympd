@@ -15,6 +15,7 @@ instance A.ToJSON SongList
 
 data Options = Options
   { port :: Int
+  , use_tls :: Bool
   , mpdHost :: String
   , mpdPort :: Integer
   , mpdPass :: String
