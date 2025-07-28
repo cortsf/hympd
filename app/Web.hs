@@ -116,7 +116,7 @@ queuePage options = do
                            td_ [class_ "flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
                            td_ [class_ "flex place-content-between flex-grow cursor-pointer song-item flex"] $ do
                              button_ ([onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "place-content-between py-2 w-full flex flex-row place-content-start focus:outline-none cursor-pointer"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ do
-                               div_ [class_ "text-ellipsis grow flex place-content-start"] $ toHtml $ guessTitle song
+                               div_ [class_ "grow flex place-content-start justify-content-start text-left"] $ toHtml $ guessTitle song
                                div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
                            td_ [class_ "flex gap-x-2"] $ do
                              a_ [href_ $ "/browse?path=" <> (U.encodeText $ T.pack $ FP.takeDirectory $ MPD.toString $  MPD.sgFilePath song), class_ "pl-0 pr-4 w-1 hover:text-blue-600 text-blue-300 cursor-pointer my-auto"] $ i_ [class_ "size-4 stroke-3", data_ "feather" "search"] ""
@@ -188,7 +188,7 @@ browsePage options query_path = do
     mkIconField :: T.Text -> Html ()
     mkIconField icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
-    mkQueueButtons path = td_ [class_ "py-2 [&_button]:text-blue-400 [&_button]:hover:text-cyan-950 flex gap-x-4"] $ do 
+    mkQueueButtons path = td_ [class_ "py-2 [&_button]:text-blue-400 [&_button]:hover:text-cyan-950 flex gap-x-2 md:gap-x-4"] $ do 
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
       button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
 

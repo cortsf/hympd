@@ -12,7 +12,7 @@ jsblock = T.show $ renderJs $ [jmacro|
 
                                      ///////////////////////////////// Utility
 
-                                     function swapClass (condition, fst_class, snd_class, node) {
+                                     function swapClasses (condition, fst_class, snd_class, node) { // Bool -> [String] -> [String] -> ()
                                        if(condition){
                                          node.classList.remove.apply(node.classList, snd_class);
                                          node.classList.add.apply(node.classList, fst_class);
@@ -85,13 +85,13 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      };
 
                                      function highlightCurrentSongOnQueue (stSongID, stState) { 
-                                       var current_class = 'text-orange-100';
+                                       var current_item_classes = ["text-amber-500", "dark:text-orange-300"];
                                        if ( window.location.pathname == "/queue" ){
                                          if(stState == "Stopped"){
-                                           document.querySelectorAll(".song-item").forEach(function(x){x.classList.remove(current_class)});
+                                           document.querySelectorAll(".song-item").forEach(function(x){swapClasses(true, [], current_item_classes, x)});
                                          } else {
-                                           document.querySelectorAll(".song-item").forEach(function(x){x.classList.remove(current_class)});
-                                           document.querySelector("button[data-songId='"+stSongID+"']").parentNode.classList.add(current_class);
+                                           document.querySelectorAll(".song-item").forEach(function(x){swapClasses(true, [], current_item_classes, x)});
+                                           swapClasses(true, current_item_classes, [], document.querySelector("button[data-songId='"+stSongID+"']").parentNode);
                                          };
                                        };
                                      };
@@ -106,10 +106,10 @@ jsblock = T.show $ renderJs $ [jmacro|
                                      };
 
                                      function setQueueButtons (status) {
-                                       swapClass(status.stRandom, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnRandom'));
-                                       swapClass(status.stConsume, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnConsume'));
-                                       swapClass(status.stSingle, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnSingle'));
-                                       swapClass(status.stRepeat, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnRepeat'));
+                                       swapClasses(status.stRandom, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnRandom'));
+                                       swapClasses(status.stConsume, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnConsume'));
+                                       swapClasses(status.stSingle, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnSingle'));
+                                       swapClasses(status.stRepeat, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnRepeat'));
                                      };
 
                                      function setUI (status, songTitle) {
