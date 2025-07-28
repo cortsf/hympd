@@ -54,7 +54,7 @@ page options current_page content = do
               Right (Just song) -> guessTitle song
       pure $ doctypehtml_ $ html_ [lang_ "en"] $ do
         head_ $ do
-          title_ "Hympd!!"
+          title_ "Hympd"
           script_ [src_ "/static/styles.css"] ("" :: String)
           script_ [src_ "/static/icons.js"] ("" :: String)
           link_ [rel_ "icon", href_ "/static/favicon11.png?v=5", sizes_ "any", type_ "image/png"]
