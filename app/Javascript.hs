@@ -131,7 +131,7 @@ jsblock = T.show $ renderJs $ [jmacro|
                                        document.querySelector('#navStop').addEventListener('click', function (){socket.send('stop')}, false);
                                        document.querySelector('#navPlayPause').addEventListener('click', function (){socket.send('toggle')}, false);
                                        document.querySelector('#navNext').addEventListener('click', function () {socket.send('next')}, false);
-                                       addEventListener("visibilitychange", function (event) {if(!document.hidden){socket.send('status');};});
+                                       addEventListener("visibilitychange", function () {if(!document.hidden){socket.send('status');};});
                                        socket.send('status')
                                      };
 
