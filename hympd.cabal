@@ -1,17 +1,16 @@
 cabal-version:      3.4
 name:               hympd
 version:            0.1.0.0
--- synopsis:
--- description:
+synopsis:           MPD web interface.
+description:        Simple minimalistic web client to the Music Player Daemon.
 license:            BSD-3-Clause
 license-file:       LICENSE
 author:             Franco Cortesi
 maintainer:         cortesifranco3@gmail.com
--- copyright:
+copyright:          Franco Cortesi
 category:           Web
 build-type:         Simple
 extra-doc-files:    CHANGELOG.md
--- extra-source-files:
 
 common warnings
     ghc-options: -Wall
@@ -22,7 +21,6 @@ executable hympd
     other-modules:    Javascript
                     , Web
                     , Stream
-    -- other-extensions:
     build-depends:    base ^>=4.20
                     , servant
                     , servant-server

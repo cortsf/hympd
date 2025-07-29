@@ -1,4 +1,4 @@
-# Revision history for ympd
+# Revision history for Hympd
 
 ## 0.1.0.0 -- YYYY-mm-dd
 

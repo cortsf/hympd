@@ -62,11 +62,12 @@ page options current_page content = do
           style_ $ T.pack "#playerProgressInput{-webkit-appearance: none; background: oklch(55.6% 0 0); background-image: linear-gradient(#FFD6A8, #FFD6A8); background-size: " <> current_time_percentage <> "% 100%; background-repeat: no-repeat;}#playerProgressInput::-webkit-slider-thumb {-webkit-appearance: none; height: 0px; width: 0px;}"
           meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1.0"]
           meta_ [name_ "description", content_ "Hympd: MPD client"]
-        body_ [class_ "overflow-y-scroll flex flex-col bg-white dark:bg-gray-900 focus:outline-none text-slate-600 dark:text-slate-400 lg:text-base wrap-anywhere"] $ do
-          nav_full current_page songTitle volume elapsed_time total_time playPause_icon
-          div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
-            content
-          script_ $ "feather.replace();"
+        body_ [class_ "overflow-y-scroll"] $ do
+          div_ [class_ "min-h-screen bg-red-200 flex flex-col bg-white md:bg-gray-200 dark:bg-gray-900 text-slate-600 dark:text-slate-400 lg:text-base wrap-anywhere focus:outline-none"] $ do
+            nav_full current_page songTitle volume elapsed_time total_time playPause_icon
+            div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full h-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
+              content
+            script_ $ "feather.replace();"
           script_ $ jsblock
 
 nav_full :: CurrentPage -> String -> Integer -> String -> String -> String -> Html ()
@@ -194,8 +195,13 @@ browsePage options query_path = do
 
 settingsPage :: Options -> Handler (Html ())
 settingsPage options = do
-  mpdStatus <- liftIO $ withMpdOpt options $ MPD.status
   page options Settings $ do
-    p_ [class_ "text-2xl ml-4"] "Settings"
-    div_ [class_ "mt-4 p-4"] $ pre_ $ toHtml $ either P.pShowNoColor P.pShowNoColor mpdStatus
+    div_ [class_ "ml-4 pb-10"] $ do
+      p_ [class_ "text-2xl"] "Settings"
+      p_ [class_ "mt-4 "] "Not implemented:"
+      ul_ [class_ "list-disc ml-8"] $ do
+        li_ "Update DB button"
+        li_ "Show/hide Update button on browse page folders"
+        li_ "Show/hide path, album and artist name on queue page items"
+        li_ "Show/hide path, album and artist name on nav bar player"
 
