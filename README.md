@@ -29,6 +29,25 @@ nix build
 
 ```
 
+#### Nixos
+
+``` nix
+  systemd = {
+    services.hympd = {
+      wantedBy = [ "multi-user.target" ];
+      path = [ pkgs.coreutils ];
+      enable = true;
+      script = ''cd /path/to/hympd && ./result/bin/hympd --port 3003'';
+    };
+  };
+```
+
+Where `/path/to/hympd` is the project root folder containing the cabal and nix files.
+
+#### Android
+
+Both [Native alpha](https://play.google.com/store/search?q=native%20alpha&c=apps) (open source) and [hermit](https://play.google.com/store/search?q=hermit&c=apps) allow to use any webpage like a standalone application (with a home screen icon, no search bar, etc).
+
 ## Hacking with greasemonkey
 
 Use `socket.send()` to control MPD:
