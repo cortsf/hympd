@@ -18,7 +18,6 @@ import Utility
 
 import Network.Wai
 import Network.Wai.Handler.Warp
-import Network.Wai.Handler.WarpTLS
 import Servant
 import System.IO
 import Lucid
@@ -36,10 +35,6 @@ confParser = do
     option auto $
       long "port"
         <> metavar "INT"
-        <> help "port (web interface)"
-  use_tls <-
-    switch $
-      long "use-tls"
         <> help "port (web interface)"
   mpdHost <-
     strOption $
@@ -94,10 +89,7 @@ runServer options = do
         setPort (port options) $
         setBeforeMainLoop (hPutStrLn stderr ("Listening on port " ++ show (port options))) $
         defaultSettings
-  if use_tls options then
-    runTLS (tlsSettings "cert.pem" "key.pem") settings =<< (mkApp options)
-    else
-    runSettings settings =<< (mkApp options)
+  runSettings settings =<< (mkApp options)
 
 
 mkApp :: Options -> IO Application
