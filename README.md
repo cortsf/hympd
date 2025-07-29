@@ -71,6 +71,20 @@ socket.send('addPath,' + string);
 socket.send('seekCur,' + int_number);
 ```
 
+#### Example
+As a trivial example, if you want the song title in the nav bar to act as a play/pause button when using the 'queue' page, you could use the following greasemonkey script. Each time you click the title the song will play/pause and the interface will update accordingly.
+
+``` javascript
+// ==UserScript==
+// @run-at document-idle
+// @match http://localhost:3003/*
+// ==/UserScript==
+
+
+if(window.location.pathname == "/queue"){
+    document.querySelector('#currentSong').addEventListener('click', () => { socket.send('toggle') });
+}
+```
 
 ## Contributing
 
