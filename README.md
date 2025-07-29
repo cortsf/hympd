@@ -2,7 +2,7 @@ Hympd - Simple [MPD](https://mpd.readthedocs.io/en/latest/) web interface
 
 - Minimalistic responsive design with dark and light color schemes.
 - Vim-like browser friendly.
-- Easy to hack/customize with greasemonkey.
+- [Easy to hack/customize with greasemonkey.](https://github.com/cortsf/hympd/wiki/Hacking-with-greasemonkey)
 
 
 ## Screenshots
@@ -47,44 +47,6 @@ Where `/path/to/hympd` is the project root folder containing the cabal and nix f
 #### Android
 
 Both [Native alpha](https://play.google.com/store/search?q=native%20alpha&c=apps) (open source) and [hermit](https://play.google.com/store/search?q=hermit&c=apps) allow to use any webpage like a standalone application (with a home screen icon, no search bar, etc).
-
-## Hacking with greasemonkey
-
-Use `socket.send()` to control MPD:
-
-``` javascript
-socket.send('toggle');
-socket.send('stop');
-socket.send('next');
-socket.send('previous');
-socket.send('status');
-socket.send('clear');
-socket.send('random');
-socket.send('repeat');
-socket.send('single');
-socket.send('consume');
-socket.send('volume,' + int_number); 
-socket.send('playId,' + int_number);
-socket.send('deleteId,' +  int_number);
-socket.send('playPath,' + string);
-socket.send('addPath,' + string);
-socket.send('seekCur,' + int_number);
-```
-
-#### Example
-As a trivial example, if you want the song title in the nav bar to act as a play/pause button when using the 'queue' page, you could use the following greasemonkey script. Each time you click the title the song will play/pause and the interface will update accordingly.
-
-``` javascript
-// ==UserScript==
-// @run-at document-idle
-// @match http://localhost:3003/*
-// ==/UserScript==
-
-
-if(window.location.pathname == "/queue"){
-    document.querySelector('#currentSong').addEventListener('click', () => { socket.send('toggle') });
-}
-```
 
 ## Contributing
 
