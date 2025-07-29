@@ -53,7 +53,10 @@ socket.send('seekCur,' + int_number);
 ```
 
 
-## Donations
+## Contributing
+
+Feedback is welcome so feel free to open issues or start a [discussion](https://github.com/cortsf/hympd/discussions).
+
 Consider making a donation to support my work:
 
 - USDC/ETH: 0x8d9894B71a7508FA5eEa2982b0faA56FF77716d2
