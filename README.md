@@ -29,6 +29,8 @@ nix build
 
 ```
 
+Then navigate in your browser to `localhost:<port_number>/queue`
+
 #### Nixos service
 
 ``` nix
