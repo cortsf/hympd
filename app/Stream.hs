@@ -37,7 +37,7 @@ data MPDCommand = Toggle
   deriving Show
 
 parseMsg :: String -> Either P.ParseError MPDCommand
-parseMsg = P.parse (parseCommand P.<|> parseCommandValue) "(unknown)"
+parseMsg = P.parse (parseCommand P.<|> parseCommandValue) "Can't parse input."
 
 parseCommand :: P.Parser MPDCommand
 parseCommand = do
@@ -177,7 +177,7 @@ streamData options pc = do
     sendData conn subsystems status = if ((MPD.stState status) /= MPD.Stopped) then do
       currentSong <- MPD.withMPD MPD.currentSong
       case currentSong of
-        Left song_error -> sendError conn $ "Song error (idle) " <> show song_error
+        Left song_error -> sendError conn $ "Song error: " <> show song_error
         Right song -> WS.sendTextData conn $ A.encode $ Payload subsystems status (guessTitle <$> song)
       else
         WS.sendTextData conn $ A.encode $ Payload subsystems status Nothing
