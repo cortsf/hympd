@@ -40,6 +40,7 @@ nix build
       script = ''cd /path/to/hympd && ./result/bin/hympd --port 3003'';
     };
   };
+  networking.firewall.allowedTCPPorts = [ 3003 ];
 ```
 
 Where `/path/to/hympd` is the project root folder containing the cabal and nix files.
