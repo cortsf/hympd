@@ -64,6 +64,7 @@ main = do
 -- * api
 
 type WebApi =
+  Get '[HTML] (Html ()) :<|>
   "queue" :> Get '[HTML] (Html ()) :<|>
   "browse" :> QueryParam "path" String :> Get '[HTML] (Html ()) :<|>
   "settings" :> Get '[HTML] (Html ()) :<|>
@@ -76,11 +77,13 @@ webApi = Proxy
 -- * app
 
 server :: Options -> Server WebApi
-server options = (queuePage options) :<|> 
-         (browsePage options) :<|> 
-         (settingsPage options) :<|> 
-         (streamData options) :<|> 
-         (serveDirectoryWebApp "static")
+server options = 
+  (queuePage options) :<|> 
+  (queuePage options) :<|> 
+  (browsePage options) :<|> 
+  (settingsPage options) :<|> 
+  (streamData options) :<|> 
+  (serveDirectoryWebApp "static")
 
 
 runServer :: Options -> IO ()
