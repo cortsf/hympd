@@ -33,6 +33,8 @@ Then navigate in your browser to `http://localhost:<port_number>`
 
 #### Nixos service
 
+Hopefully Hympd will get into nixpkgs with service options. See [#5](/../../issues/5). In the mean time you can use:
+
 ``` nix
   systemd = {
     services.hympd = {
@@ -41,10 +43,12 @@ Then navigate in your browser to `http://localhost:<port_number>`
       script = ''cd /path/to/hympd && ./result/bin/hympd --port 3003'';
     };
   };
-  networking.firewall.allowedTCPPorts = [ 3003 ];
+  networking.firewall.allowedTCPPorts = [ 3003 ]; # If you want access from other devices in you local network.
 ```
 
 Where `/path/to/hympd` is the project root folder containing the cabal and nix files.
+
+You may want to use a static IP so you can bookmark the url or create a native-like app in your phone. I personally use `networking.networkmanager.enable = true;` and set a static IP with `nmtui`.
 
 #### Android
 
