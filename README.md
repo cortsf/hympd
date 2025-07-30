@@ -29,13 +29,12 @@ nix build
 
 ```
 
-#### Nixos
+#### Nixos service
 
 ``` nix
   systemd = {
     services.hympd = {
       wantedBy = [ "multi-user.target" ];
-      path = [ pkgs.coreutils ];
       enable = true;
       script = ''cd /path/to/hympd && ./result/bin/hympd --port 3003'';
     };
