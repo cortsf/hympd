@@ -28,6 +28,7 @@ data MPDCommand = Toggle
   | Repeat
   | Single 
   | Consume
+  | UpdateAll
   | Volume Int 
   | PlayId Int 
   | DeleteId Int 
@@ -50,7 +51,8 @@ parseCommand = do
              P.try (P.string "random") P.<|>
              P.try (P.string "repeat") P.<|>
              P.try (P.string "single") P.<|>
-             P.try (P.string "consume")
+             P.try (P.string "consume") P.<|>
+             P.try (P.string "updateAll")
   P.eof
   case command of
     "toggle" -> pure $ Toggle
@@ -63,6 +65,7 @@ parseCommand = do
     "repeat" -> pure $ Repeat
     "single" -> pure $ Single
     "consume" -> pure $ Consume
+    "updateAll" -> pure $ UpdateAll
 
 parseCommandValue :: P.Parser MPDCommand
 parseCommandValue = do
@@ -115,45 +118,44 @@ streamData options pc = do
       case parseMsg $ T.unpack msg of
         Right Status -> do
           onStatus conn (sendData conn [])
-          pure ()
         Right Toggle -> do
           onStatus conn (\mpdStatus -> if MPD.stState mpdStatus == MPD.Stopped then (liftIO $ MPD.withMPD $ MPD.play Nothing) >> pure () else (liftIO $ MPD.withMPD $ MPD.toggle) >> pure ())
-          pure ()
         Right Stop -> do
-          (liftIO $ MPD.withMPD $ MPD.stop) 
+          liftIO $ MPD.withMPD $ MPD.stop
           pure ()
         Right Next -> do
-          (liftIO $ MPD.withMPD $ MPD.next) 
+          liftIO $ MPD.withMPD $ MPD.next
           pure ()
         Right Previous -> do
-          (liftIO $ MPD.withMPD $ MPD.previous) 
+          liftIO $ MPD.withMPD $ MPD.previous
           pure ()
         Right Clear -> do
-          (liftIO $ MPD.withMPD $ MPD.clear) 
+          liftIO $ MPD.withMPD $ MPD.clear
           pure ()
         Right Random -> do
           onStatus conn (\mpdStatus -> (liftIO $ MPD.withMPD $ MPD.random $ not $ MPD.stRandom mpdStatus) >> pure ())
-          pure ()
         Right Repeat -> do
           onStatus conn (\mpdStatus -> (liftIO $ MPD.withMPD $ MPD.repeat $ not $ MPD.stRepeat $ mpdStatus) >> pure ())
-          pure ()
         Right Single -> do
           onStatus conn (\mpdStatus -> (liftIO $ MPD.withMPD $ MPD.single $ not $ MPD.stSingle $ mpdStatus) >> pure ())
-          pure ()
         Right Consume -> do
           onStatus conn (\mpdStatus -> (liftIO $ MPD.withMPD $ MPD.consume $ not $ MPD.stConsume $ mpdStatus) >> pure ())
+        Right UpdateAll -> do
+          liftIO $ MPD.withMPD $ MPD.update Nothing
           pure ()
         Right (Volume v) -> do
-          (liftIO $ MPD.withMPD $ MPD.setVolume (fromIntegral v)) 
+          liftIO $ MPD.withMPD $ MPD.setVolume (fromIntegral v)
           pure ()
         Right (PlayId v) -> do
-          (liftIO $ MPD.withMPD $ MPD.playId (MPD.Id v)) 
+          liftIO $ MPD.withMPD $ MPD.playId (MPD.Id v)
           pure ()
         Right (DeleteId v) -> do
-          (liftIO $ MPD.withMPD $ MPD.deleteId (MPD.Id v)) 
+          liftIO $ MPD.withMPD $ MPD.deleteId (MPD.Id v)
           pure ()
         Right (PlayPath v) -> do
-          (liftIO $ MPD.withMPD $ MPD.clear) >> (liftIO $ MPD.withMPD $ MPD.add (fromString v)) >> (liftIO $ MPD.withMPD $ MPD.play Nothing) 
+          liftIO $ MPD.withMPD $ MPD.clear
+          liftIO $ MPD.withMPD $ MPD.add (fromString v)
+          liftIO $ MPD.withMPD $ MPD.play Nothing
           pure ()
         Right (AddPath v) -> do
           (liftIO $ MPD.withMPD $ MPD.add (fromString v)) 

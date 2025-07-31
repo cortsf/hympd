@@ -198,10 +198,4 @@ settingsPage options = do
   page options Settings $ do
     div_ [class_ "ml-4 pb-10"] $ do
       p_ [class_ "text-2xl"] "Settings"
-      p_ [class_ "mt-4 "] "Not implemented:"
-      ul_ [class_ "list-disc ml-8"] $ do
-        li_ "Update DB button"
-        li_ "Show/hide Update button on browse page folders"
-        li_ "Show/hide path, album and artist name on queue page items"
-        li_ "Show/hide path, album and artist name on nav bar player"
-
+      button_ [onclick_ "updateAll()", class_ "bg-blue-600 p-2 my-4 rounded text-white"] $ "Update DB"

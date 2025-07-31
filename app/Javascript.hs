@@ -12,6 +12,11 @@ jsblock = T.show $ renderJs $
          var currentTime = 0.0;
 
          ///////////////////////////////// Utility
+         updateAll = function (){
+           if(confirm('Do you really want to update the entire database?')){
+             socket.send('updateAll');
+           };
+         };
 
          function swapClasses (condition, fst_class, snd_class, node) { // Bool -> [String] -> [String] -> ()
            if(condition){
