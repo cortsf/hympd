@@ -10,6 +10,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Main where
 import Web 
@@ -24,7 +25,15 @@ import Lucid
 import Servant.HTML.Lucid
 import Servant.API.WebSocket
 import Options.Applicative
+import Servant.Static.TH qualified as SS
 
+-- * Static
+
+type StaticAPI = $(SS.createApiType "static")
+
+$(SS.createServerDec "StaticAPI" "staticServer" "static")
+
+-- * Options
 
 parseArgs :: IO Options
 parseArgs = execParser $ info confParser (progDesc "Hympd: MPD web client")
@@ -69,7 +78,7 @@ type WebApi =
   "browse" :> QueryParam "path" String :> Get '[HTML] (Html ()) :<|>
   "settings" :> Get '[HTML] (Html ()) :<|>
   "websocket" :> WebSocketPending :<|>
-  "static" :> Raw
+  "static" :> StaticAPI
 
 webApi :: Proxy WebApi
 webApi = Proxy
@@ -83,8 +92,7 @@ server options =
   (browsePage options) :<|> 
   (settingsPage options) :<|> 
   (streamData options) :<|> 
-  (serveDirectoryWebApp "static")
-
+  staticServer
 
 runServer :: Options -> IO ()
 runServer options = do
@@ -93,7 +101,6 @@ runServer options = do
         setBeforeMainLoop (hPutStrLn stderr ("Listening on port " ++ show (port options))) $
         defaultSettings
   runSettings settings =<< (mkApp options)
-
 
 mkApp :: Options -> IO Application
 mkApp options = do
