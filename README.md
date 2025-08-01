@@ -36,12 +36,11 @@ Then navigate in your browser to `http://localhost:<port_number>`
 Hopefully Hympd will get into nixpkgs with service options. See [#5](/../../issues/5). In the mean time you can use:
 
 ``` nix
-  systemd = {
-    services.hympd = {
-      wantedBy = [ "multi-user.target" ];
-      enable = true;
-      script = ''/path/to/hympd --port 3003'';
-    };
+  systemd.user.services.hympd = {
+    enable = true;
+    requires = [ "mpd.service" ];
+    wantedBy = [ "default.target" ];
+    script = ''/home/cortsf/Documents/Work/Projects/hympd/result/bin/hympd --port 3003'';
   };
   networking.firewall.allowedTCPPorts = [ 3003 ]; # If you want access from other devices in you local network.
 ```
