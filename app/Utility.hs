@@ -26,6 +26,7 @@ data Options = Options
 
 data UserConfig = UserConfig {
   showArtistOnNavbar :: Bool
+  , showPathOnNavbar :: Bool
   } deriving (Show, G.Generic)
 
 instance A.ToJSON UserConfig
@@ -33,16 +34,21 @@ instance A.ToJSON UserConfig
 defaultUserConfig :: UserConfig
 defaultUserConfig = UserConfig {
   showArtistOnNavbar = False
+  , showPathOnNavbar = False
   }
 
 instance FromHttpApiData UserConfig where
-  parseUrlPiece v = pure $ UserConfig $
-    maybe False ((==) (BSU.fromString "true")) $ 
-    lookup (BSU.fromString "showArtistOnNavbar") $ parseCookies $ BSU.fromString $ T.unpack v
+  parseUrlPiece v = do
+    let cookies = parseCookies $ BSU.fromString $ T.unpack v
+    pure $ UserConfig {
+    showArtistOnNavbar = maybe False ((==) (BSU.fromString "true")) $ lookup (BSU.fromString "showArtistOnNavbar") $ cookies
+    , showPathOnNavbar = maybe False ((==) (BSU.fromString "true")) $ lookup (BSU.fromString "showPathOnNavbar") $ cookies
+    }
 
 data CurrentSong = CurrentSong {
   title :: String
   , artist :: String
+  , path :: String
   } deriving (Show, G.Generic)
 
 instance A.ToJSON CurrentSong
@@ -51,6 +57,7 @@ currentSongFromSong :: MPD.Song -> CurrentSong
 currentSongFromSong song = CurrentSong {
   title = maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> (mconcat (intersperse ", " (MPD.toString <$> x)))) (C.lookup MPD.Title (MPD.sgTags song))
   , artist = maybe "-no artist metadata found-" (\artist_list -> mconcat $ intersperse ", " $ (MPD.toString <$> artist_list)) (C.lookup MPD.Artist (MPD.sgTags song))
+  , path = MPD.toString $ MPD.sgFilePath song
   }
   
 withMpdOpt :: Options -> MPD.MPD a -> IO (MPD.Response a)

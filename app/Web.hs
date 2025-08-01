@@ -81,11 +81,10 @@ nav_full current_page user_config current_song volume elapsed_time total_time pl
     div_ [class_ "w-full mx-auto pb-2 lg:pt-2"] $ do
       div_ [class_ "px-2"] $ do
         div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex flex-col md:flex-row place-content-between text-md pt-1 pb-2"] $ do 
-          div_ [id_ "currentSong", class_ "text-orange-200 lg:text-lg truncate"] $
-            maybe (p_ $ toHtmlRaw ("&nbsp;" :: String)) (
-            if showArtistOnNavbar user_config 
-            then do (\song -> (p_ $ toHtmlRaw $ title song) >> ( p_ [class_ "text-xs"] $ toHtmlRaw $ artist song))
-            else p_ . toHtmlRaw . title
+          div_ [id_ "currentSong", class_ "text-orange-200 lg:text-lg truncate"] $ maybe (p_ $ toHtmlRaw ("&nbsp;" :: String)) (\song -> do
+            p_ [id_ "currentSongTitle"] $ toHtmlRaw $ title song
+            p_ [id_ "currentSongArtist", classes_ (["text-xs"] <> (if showArtistOnNavbar user_config then ["block"] else ["hidden"]))] $ toHtmlRaw $ artist song
+            p_ [id_ "currentSongPath", classes_ (["text-xs"] <> (if showPathOnNavbar user_config then ["block"] else ["hidden"]))] $ toHtmlRaw $ path song
             ) current_song
           div_ [class_ "flex space-x-4 mt-4 lg:mt-0 text-orange-200 [&_.playerButton]:dark:hover:text-orange-400"] $ do
             button_ [id_ "navPrevious", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-back", class_ "size-6"] ""
@@ -93,8 +92,8 @@ nav_full current_page user_config current_song volume elapsed_time total_time pl
             button_ [id_ "navPlayPause", class_ "playerButton cursor-pointer block"] $ i_  [data_ "feather" (T.pack playPause_icon), class_ "size-6"] ""
             button_ [id_ "navNext", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-forward", class_ "size-6"] ""
             div_ [class_ "flex items-center w-full"] $ input_ [id_ "navVolume", onchange_ "socket.send('volume,' + this.value)", type_ "range", value_ $ T.pack $ show volume, class_ "w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-orange-200 hover:bg-orange-400"]
-        div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 my-2 lg:my-0 lg:pt-0"] $ do
-          div_ [class_ "grow"] $ input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 w-full h-1 rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
+        div_ [class_ "max-w-screen-xl flex flex-row items-center justify-between mx-auto px-4 gap-x-4 my-0 lg:my-0 lg:pt-0"] $ do
+          div_ [class_ "grow"] $ input_ [id_ "playerProgressInput", oninput_ "socket.send('seekCur,'+this.value)", type_ "range", value_ "0", class_ "focus:outline-none border-none range-lg h-2 w-full rounded-lg cursor-pointer bg-gray-600 dark:bg-slate-800"]
           div_ [class_ "text-orange-200 hidden sm:block"] $ span_ [id_ "elapsedTime", class_ ""] (toHtml elapsed_time) <> span_ [class_ "mx-1"] "/" <> span_ [id_ "totalTime", class_ ""] (toHtml total_time)
 
 ------------------------------------------------------------
@@ -204,8 +203,11 @@ settingsPage options user_config = do
     div_ [class_ "ml-4 pb-10"] $ do
       p_ [class_ "text-2xl"] "Settings"
       button_ [id_ "updateAll", class_ "ml-4 bg-blue-500 hover:bg-blue-600 py-2 px-4 my-4 rounded text-white flex items-center gap-x-1"] $ "Update DB"
-      div_ [class_ "bg-slate-600 rounded ml-4 mr-8 mt-8 p-8"] $ do
+      div_ [class_ "bg-slate-600 rounded ml-4 mr-8 mt-8 p-8 flex flex-col gap-y-4"] $ do
           p_ $ do
             input_ [id_ "showArtistOnNavbar", type_ "checkbox", class_ "mr-2"]
             label_ [class_ ""] $ "Show artist name on nav bar player"
-          p_ [class_ "mt-8"] $ button_ [id_ "submitBtn", class_ "bg-blue-500 hover:bg-blue-600 rounded text-white px-4 py-2"] $ "Save config"
+          p_ $ do
+            input_ [id_ "showPathOnNavbar", type_ "checkbox", class_ "mr-2"]
+            label_ [class_ ""] $ "Show filepath on nav bar player"
+          p_ [class_ "mt-4"] $ button_ [id_ "submitBtn", class_ "bg-blue-500 hover:bg-blue-600 rounded text-white px-4 py-2"] $ "Save config"

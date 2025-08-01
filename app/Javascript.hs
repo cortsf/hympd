@@ -31,6 +31,7 @@ jsblock = T.show $ renderJs $
 
          function saveConfig() {
            setCookie('showArtistOnNavbar', document.querySelector('#showArtistOnNavbar').checked);
+           setCookie('showPathOnNavbar', document.querySelector('#showPathOnNavbar').checked);
            location.reload()
          };
 
@@ -101,12 +102,14 @@ jsblock = T.show $ renderJs $
          };
 
          function setSongTitle (stState,  currentSong) { 
-           if((stState != "Stopped") && (getCookie("showArtistOnNavbar") == "true")){
-             document.querySelector('#currentSong').innerHTML='<p>'+currentSong.title+'</p><p class="text-xs">'+currentSong.artist+'</p>';
-           } else if(stState != "Stopped"){
-             document.querySelector('#currentSong').innerHTML='<p>'+currentSong.title+'</p>';
+           if((stState != "Stopped")){
+             document.querySelector('#currentSongTitle').innerHTML = currentSong.title;
+             document.querySelector('#currentSongArtist').innerHTML = currentSong.artist;
+             document.querySelector('#currentSongPath').innerHTML = currentSong.path;
            } else {
-             document.querySelector('#currentSong').innerHTML='';
+             document.querySelector('#currentSongTitle').innerHTML='';
+             document.querySelector('#currentSongArtist').innerHTML='';
+             document.querySelector('#currentSongPath').innerHTML='';
            };
          };
 
@@ -151,8 +154,12 @@ jsblock = T.show $ renderJs $
 
          function setConfig() {
            var showArtistOnNavbar = getCookie("showArtistOnNavbar");
+           var showPathOnNavbar = getCookie("showPathOnNavbar");
            if(showArtistOnNavbar == 'true'){
              document.querySelector('#showArtistOnNavbar').checked = true;
+           };
+           if(showPathOnNavbar == 'true'){
+             document.querySelector('#showPathOnNavbar').checked = true;
            };
          };
 
