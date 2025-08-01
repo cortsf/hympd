@@ -84,7 +84,7 @@ nav_full current_page user_config current_song volume elapsed_time total_time pl
           div_ [id_ "currentSong", class_ "text-orange-200 lg:text-lg truncate"] $
             maybe (p_ $ toHtmlRaw ("&nbsp;" :: String)) (
             if showArtistOnNavbar user_config 
-            then do (\song -> (p_ $ toHtmlRaw $ title song) >> ( p_ [class_ "text-xs"] $ toHtmlRaw $ (fromMaybe "" $ artist song)))
+            then do (\song -> (p_ $ toHtmlRaw $ title song) >> ( p_ [class_ "text-xs"] $ toHtmlRaw $ artist song))
             else p_ . toHtmlRaw . title
             ) current_song
           div_ [class_ "flex space-x-4 mt-4 lg:mt-0 text-orange-200 [&_.playerButton]:dark:hover:text-orange-400"] $ do

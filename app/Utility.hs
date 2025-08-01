@@ -42,7 +42,7 @@ instance FromHttpApiData UserConfig where
 
 data CurrentSong = CurrentSong {
   title :: String
-  , artist :: Maybe String
+  , artist :: String
   } deriving (Show, G.Generic)
 
 instance A.ToJSON CurrentSong
@@ -50,7 +50,7 @@ instance A.ToJSON CurrentSong
 currentSongFromSong :: MPD.Song -> CurrentSong
 currentSongFromSong song = CurrentSong {
   title = maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> (mconcat (intersperse ", " (MPD.toString <$> x)))) (C.lookup MPD.Title (MPD.sgTags song))
-  , artist = (mconcat . intersperse ", ") <$> ((<$>) (MPD.toString) <$> (C.lookup MPD.Artist (MPD.sgTags song)))
+  , artist = maybe "-no artist metadata found-" (\artist_list -> mconcat $ intersperse ", " $ (MPD.toString <$> artist_list)) (C.lookup MPD.Artist (MPD.sgTags song))
   }
   
 withMpdOpt :: Options -> MPD.MPD a -> IO (MPD.Response a)
