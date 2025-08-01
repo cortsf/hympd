@@ -29,6 +29,7 @@ executable hympd
                     , servant-static-th
                     , warp
                     , wai
+                    , cookie
                     , conduit
                     , websockets
                     , lucid
@@ -44,5 +45,6 @@ executable hympd
                     , pretty-simple
                     , bytestring
                     , uri-encode
+                    , utf8-string
     hs-source-dirs:   app
     default-language: GHC2024

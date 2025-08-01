@@ -12,10 +12,26 @@ jsblock = T.show $ renderJs $
          var currentTime = 0.0;
 
          ///////////////////////////////// Utility
-         updateAll = function (){
+
+         function updateAll (){
            if(confirm('Do you really want to update the entire database?')){
              socket.send('updateAll');
            };
+         };
+
+         function getCookie (name) {
+           var re = new RegExp(name + "=([^;]+)");
+           var value = re.exec(document.cookie);
+           return (value != null) ? unescape(value[1]) : null;
+         };
+
+         function setCookie(name, value) {
+           document.cookie=name + "=" + escape(value) + "; path=/; max-age=31536000";
+           };
+
+         function saveConfig() {
+           setCookie('showArtistOnNavbar', document.querySelector('#showArtistOnNavbar').checked);
+           location.reload()
          };
 
          function swapClasses (condition, fst_class, snd_class, node) { // Bool -> [String] -> [String] -> ()
@@ -84,9 +100,13 @@ jsblock = T.show $ renderJs $
            document.querySelector('#navVolume').value=stVolume 
          };
 
-         function setSongTitle (stState,  songTitle) { 
-           if(stState != "Stopped"){
-             document.querySelector('#currentSong').innerHTML=songTitle;
+         function setSongTitle (stState,  currentSong) { 
+           if((stState != "Stopped") && (getCookie("showArtistOnNavbar") == "true")){
+             document.querySelector('#currentSong').innerHTML='<p>'+currentSong.title+'</p><p class="text-xs">'+currentSong.artist+'</p>';
+           } else if(stState != "Stopped"){
+             document.querySelector('#currentSong').innerHTML='<p>'+currentSong.title+'</p>';
+           } else {
+             document.querySelector('#currentSong').innerHTML='';
            };
          };
 
@@ -118,8 +138,8 @@ jsblock = T.show $ renderJs $
            swapClasses(status.stRepeat, ["text-lime-400", "hover:text-lime-600"], ["text-slate-400", "hover:text-slate-200"], document.querySelector('#btnRepeat'));
          };
 
-         function setUI (status, songTitle) {
-           setSongTitle(status.stState, songTitle);
+         function setUI (status, currentSong) {
+           setSongTitle(status.stState, currentSong);
            setProgress(status.stTime, status.stState);
            setVolume(status.stVolume);
            setPlaybackState(status.stState);
@@ -128,6 +148,13 @@ jsblock = T.show $ renderJs $
             setQueueButtons(status);
            };
          }
+
+         function setConfig() {
+           var showArtistOnNavbar = getCookie("showArtistOnNavbar");
+           if(showArtistOnNavbar == 'true'){
+             document.querySelector('#showArtistOnNavbar').checked = true;
+           };
+         };
 
          ///////////////////////////////// Socket
 
@@ -160,5 +187,13 @@ jsblock = T.show $ renderJs $
          socket.onerror = function(error_msg) {
            alert('ERROR: ' + error_msg);
          };
+
+         addEventListener("load", function () {
+           if ( window.location.pathname == "/settings" ){
+             document.querySelector('#updateAll').addEventListener('click', updateAll);
+             document.querySelector('#submitBtn').addEventListener('click', saveConfig);
+             setConfig();
+           };
+         });
 
          |]

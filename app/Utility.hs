@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module Utility where
-import Data.Maybe (listToMaybe)
+import Data.List (intersperse)
 import Network.MPD qualified as MPD
 import Data.Aeson qualified as A 
 import GHC.Generics qualified as G
@@ -9,6 +9,9 @@ import Data.Time.Format
 import Data.Time.Clock.POSIX
 import System.FilePath.Posix qualified as FP
 import Data.Map.Strict qualified as C
+import Servant.API (FromHttpApiData, parseUrlPiece)
+import Web.Cookie
+import Data.ByteString.UTF8 qualified as BSU
 
 data SongList = SongList { songId :: Int, songName :: String } deriving G.Generic
 instance A.ToJSON SongList
@@ -21,7 +24,35 @@ data Options = Options
   }
   deriving (Show)
 
+data UserConfig = UserConfig {
+  showArtistOnNavbar :: Bool
+  } deriving (Show, G.Generic)
 
+instance A.ToJSON UserConfig
+
+defaultUserConfig :: UserConfig
+defaultUserConfig = UserConfig {
+  showArtistOnNavbar = False
+  }
+
+instance FromHttpApiData UserConfig where
+  parseUrlPiece v = pure $ UserConfig $
+    maybe False ((==) (BSU.fromString "true")) $ 
+    lookup (BSU.fromString "showArtistOnNavbar") $ parseCookies $ BSU.fromString $ T.unpack v
+
+data CurrentSong = CurrentSong {
+  title :: String
+  , artist :: Maybe String
+  } deriving (Show, G.Generic)
+
+instance A.ToJSON CurrentSong
+
+currentSongFromSong :: MPD.Song -> CurrentSong
+currentSongFromSong song = CurrentSong {
+  title = maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> (mconcat (intersperse ", " (MPD.toString <$> x)))) (C.lookup MPD.Title (MPD.sgTags song))
+  , artist = (mconcat . intersperse ", ") <$> ((<$>) (MPD.toString) <$> (C.lookup MPD.Artist (MPD.sgTags song)))
+  }
+  
 withMpdOpt :: Options -> MPD.MPD a -> IO (MPD.Response a)
 withMpdOpt options = MPD.withMPDEx (mpdHost options) (mpdPort options) (mpdPass options)
 
@@ -39,9 +70,6 @@ infix 9 !!?
     go j (_:ys) = go (j - 1) ys
     go _ []     = Nothing
 {-# INLINE (!!?) #-}
-
-guessTitle :: MPD.Song -> String
-guessTitle song = maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> maybe "No title metadata" (MPD.toString) (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags song))
 
 prettyTime :: Int -> String
 prettyTime seconds = formatTime defaultTimeLocale (if seconds  > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ seconds

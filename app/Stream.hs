@@ -4,18 +4,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Stream where
 
-import Utility (guessTitle, withMpdOpt, Options(..))
+import Utility (withMpdOpt, Options(..), CurrentSong(..), currentSongFromSong)
 import Data.String (fromString)
 import Control.Monad.IO.Class
 import Control.Monad
 import Control.Concurrent
 import GHC.Float (int2Double)
-import qualified Text.ParserCombinators.Parsec as P
-import qualified Network.WebSockets as WS
-import qualified Network.MPD as MPD
-import qualified Data.Text as T
-import qualified Data.Aeson as A
-import qualified GHC.Generics as G
+import Text.ParserCombinators.Parsec qualified as P
+import Network.WebSockets qualified as WS
+import Network.MPD qualified as MPD
+import Data.Text qualified as T
+import Data.Aeson qualified as A
+import GHC.Generics qualified as G
 
 
 data MPDCommand = Toggle 
@@ -86,9 +86,9 @@ parseCommandValue = do
     "addPath" -> pure $ AddPath $ value
     "seekCur" -> pure $ SeekCur $ read value
 
-
 data ClientMessage = 
-  Payload [MPD.Subsystem] MPD.Status (Maybe String)
+  -- Payload [MPD.Subsystem] MPD.Status (Maybe String)
+  Payload [MPD.Subsystem] MPD.Status (Maybe CurrentSong)
   | Error String
   deriving (Show, G.Generic)
 
@@ -180,6 +180,6 @@ streamData options pc = do
       currentSong <- MPD.withMPD MPD.currentSong
       case currentSong of
         Left song_error -> sendError conn $ "Song error: " <> show song_error
-        Right song -> WS.sendTextData conn $ A.encode $ Payload subsystems status (guessTitle <$> song)
+        Right song -> WS.sendTextData conn $ A.encode $ Payload subsystems status (currentSongFromSong <$> song)
       else
         WS.sendTextData conn $ A.encode $ Payload subsystems status Nothing

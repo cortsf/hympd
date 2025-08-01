@@ -73,10 +73,10 @@ main = do
 -- * api
 
 type WebApi =
-  Get '[HTML] (Html ()) :<|>
-  "queue" :> Get '[HTML] (Html ()) :<|>
-  "browse" :> QueryParam "path" String :> Get '[HTML] (Html ()) :<|>
-  "settings" :> Get '[HTML] (Html ()) :<|>
+  Header "Cookie" UserConfig :> Get '[HTML] (Html ()) :<|>
+  "queue" :> Header "Cookie" UserConfig :> Get '[HTML] (Html ()) :<|>
+  "browse" :> Header "Cookie" UserConfig :> QueryParam "path" String :> Get '[HTML] (Html ()) :<|>
+  "settings" :> Header "Cookie" UserConfig :> Get '[HTML] (Html ()) :<|>
   "websocket" :> WebSocketPending :<|>
   "static" :> StaticAPI
 

@@ -31,8 +31,8 @@ import System.FilePath.Posix qualified as FP
 
 data CurrentPage = Queue | Browse | Settings deriving Eq
 
-page :: Options -> CurrentPage -> Html () -> Handler (Html ())
-page options current_page content = do
+page :: Options -> UserConfig -> CurrentPage -> Html () -> Handler (Html ())
+page options user_config current_page content = do
   mpdStatus <- liftIO $ withMpdOpt options $ MPD.status
   case mpdStatus of
     Left e -> pure $ p_ $ toHtml $ "Error - Can't connect to MPD: "  <> show e
@@ -47,11 +47,11 @@ page options current_page content = do
             (MPD.stTime status)
           playPause_icon = if MPD.stState status == MPD.Paused then "play" else "pause"
           volume = maybe 0 toInteger $ MPD.stVolume status
-          songTitle = do
+          current_song = do
             case currentSongResponse of
-              Left _ -> "&nbsp;"
-              Right Nothing -> "&nbsp;"
-              Right (Just song) -> guessTitle song
+              Left _ -> Nothing
+              Right Nothing -> Nothing
+              Right msong -> currentSongFromSong <$> msong
       pure $ doctypehtml_ $ html_ [lang_ "en"] $ do
         head_ $ do
           title_ "Hympd"
@@ -64,14 +64,14 @@ page options current_page content = do
           meta_ [name_ "description", content_ "Hympd: MPD client"]
         body_ [class_ "overflow-y-scroll"] $ do
           div_ [class_ "min-h-screen bg-red-200 flex flex-col bg-white md:bg-gray-200 dark:bg-gray-900 text-slate-600 dark:text-slate-400 lg:text-base wrap-anywhere focus:outline-none"] $ do
-            nav_full current_page songTitle volume elapsed_time total_time playPause_icon
-            div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full h-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
+            nav_full current_page user_config current_song volume elapsed_time total_time playPause_icon
+            div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
               content
             script_ $ "feather.replace();"
           script_ $ jsblock
 
-nav_full :: CurrentPage -> String -> Integer -> String -> String -> String -> Html ()
-nav_full current_page songTitle volume elapsed_time total_time playPause_icon = do
+nav_full :: CurrentPage -> UserConfig -> Maybe CurrentSong -> Integer -> String -> String -> String -> Html ()
+nav_full current_page user_config current_song volume elapsed_time total_time playPause_icon = do
   nav_ [class_ "sticky top-0 w-full dark:text-blue-200 bg-slate-700 "] $ do
     div_ [class_ "max-w-screen-xl w-full flex block mx-auto lg:pt-4 px-2 lg:px-4 [&_.menuButton]:dark:hover:text-yellow-500"] $ do
       ul_ [class_ "font-medium flex flex-row space-x-8 w-full place-content-between lg:place-content-start"] $ do
@@ -81,7 +81,12 @@ nav_full current_page songTitle volume elapsed_time total_time playPause_icon = 
     div_ [class_ "w-full mx-auto pb-2 lg:pt-2"] $ do
       div_ [class_ "px-2"] $ do
         div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex flex-col md:flex-row place-content-between text-md pt-1 pb-2"] $ do 
-          div_ [id_ "currentSong", class_ "text-orange-200 lg:text-lg truncate"] $ toHtmlRaw songTitle
+          div_ [id_ "currentSong", class_ "text-orange-200 lg:text-lg truncate"] $
+            maybe (p_ $ toHtmlRaw ("&nbsp;" :: String)) (
+            if showArtistOnNavbar user_config 
+            then do (\song -> (p_ $ toHtmlRaw $ title song) >> ( p_ [class_ "text-xs"] $ toHtmlRaw $ (fromMaybe "" $ artist song)))
+            else p_ . toHtmlRaw . title
+            ) current_song
           div_ [class_ "flex space-x-4 mt-4 lg:mt-0 text-orange-200 [&_.playerButton]:dark:hover:text-orange-400"] $ do
             button_ [id_ "navPrevious", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-back", class_ "size-6"] ""
             button_ [id_ "navStop", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "square", class_ "size-6"] ""
@@ -96,10 +101,10 @@ nav_full current_page songTitle volume elapsed_time total_time playPause_icon = 
 -- Individual Pages
 ------------------------------------------------------------
 
-queuePage :: Options -> Handler (Html ())
-queuePage options = do
+queuePage :: Options -> Maybe UserConfig -> Handler (Html ())
+queuePage options user_config = do
   playlist <- liftIO $ withMpdOpt options $ MPD.playlistInfo Nothing
-  page options Queue $ do
+  page options (fromMaybe defaultUserConfig user_config) Queue $ do
     div_ [class_ "flex ml-4 mr-2"] $ do
       span_ [class_ "text-2xl"] $ "Queue"
     div_ [class_ "flex gap-x-1 md:gap-x-6 place-content-between lg:place-content-end ml-2 text-xs md:text-base mt-4 lg:mt-0"] $ do
@@ -117,7 +122,7 @@ queuePage options = do
                            td_ [class_ "flex items-center place-content-start w-8"] $ toHtml $ maybe "" (show . (+1)) (MPD.sgIndex song)
                            td_ [class_ "flex place-content-between flex-grow cursor-pointer song-item flex"] $ do
                              button_ ([onclick_ (maybe "alert('Error: No id')" (\x -> "socket.send('playId," <> (T.pack $ show $ unId x) <> "')")  (MPD.sgId song)), class_ "place-content-between py-2 w-full flex flex-row place-content-start focus:outline-none cursor-pointer"] <> ((\songId -> data_ "songId" (T.pack $ show $ (unId songId))) <$> (maybeToList $ MPD.sgId song))) $ do
-                               div_ [class_ "grow flex place-content-start justify-content-start text-left"] $ toHtml $ guessTitle song
+                               div_ [class_ "grow flex place-content-start justify-content-start text-left"] $ toHtml $ title $ currentSongFromSong song
                                div_ [class_ "px-2"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength song > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength song
                            td_ [class_ "flex gap-x-2"] $ do
                              a_ [href_ $ "/browse?path=" <> (U.encodeText $ T.pack $ FP.takeDirectory $ MPD.toString $  MPD.sgFilePath song), class_ "pl-0 pr-4 w-1 hover:text-blue-600 text-blue-300 cursor-pointer my-auto"] $ i_ [class_ "size-4 stroke-3", data_ "feather" "search"] ""
@@ -125,11 +130,11 @@ queuePage options = do
                        ) pl
 
 
-browsePage :: Options -> Maybe String -> Handler (Html ())
-browsePage options query_path = do
+browsePage :: Options -> Maybe UserConfig -> Maybe String -> Handler (Html ())
+browsePage options user_config query_path = do
   let dirlist = FP.splitDirectories $ maybe "" (fromString . id) query_path
   mpdResult <- liftIO $ withMpdOpt options $ MPD.lsInfo $ maybe "" (fromString . id) query_path
-  page options Browse $ do
+  page options (fromMaybe defaultUserConfig user_config) Browse $ do
     div_ [class_ "flex flex-col md:flex-row place-content-between ml-4 mr-2"] $ do
       div_ [class_ "place-content-start"] $ do
         span_ [class_ "text-2xl"] $ "Browse"
@@ -193,9 +198,14 @@ browsePage options query_path = do
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
       button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
 
-settingsPage :: Options -> Handler (Html ())
-settingsPage options = do
-  page options Settings $ do
+settingsPage :: Options -> Maybe UserConfig -> Handler (Html ())
+settingsPage options user_config = do
+  page options (fromMaybe defaultUserConfig user_config) Settings $ do
     div_ [class_ "ml-4 pb-10"] $ do
       p_ [class_ "text-2xl"] "Settings"
-      button_ [onclick_ "updateAll()", class_ "bg-blue-600 p-2 my-4 rounded text-white"] $ "Update DB"
+      button_ [id_ "updateAll", class_ "ml-4 bg-blue-500 hover:bg-blue-600 py-2 px-4 my-4 rounded text-white flex items-center gap-x-1"] $ "Update DB"
+      div_ [class_ "bg-slate-600 rounded ml-4 mr-8 mt-8 p-8"] $ do
+          p_ $ do
+            input_ [id_ "showArtistOnNavbar", type_ "checkbox", class_ "mr-2"]
+            label_ [class_ ""] $ "Show artist name on nav bar player"
+          p_ [class_ "mt-8"] $ button_ [id_ "submitBtn", class_ "bg-blue-500 hover:bg-blue-600 rounded text-white px-4 py-2"] $ "Save config"
