@@ -148,6 +148,7 @@ browsePage options user_config query_path = do
           div_ [class_ "mt-4 md:mt-4 lg:items-end items-center flex place-content-around lg:place-content-end md:gap-x-6 [&_button]:text-slate-400 [&_button]:hover:text-slate-200"] $ do
             button_ [onclick_ $ "location.href='/browse" <> (if length dirlist > 1 then T.pack $ "?path=" <> (mconcat $ intersperse "/" (init dirlist)) else "") <> "'", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "corner-left-up"] "" <> span_ [class_ "ml-1"] "Up")
             button_ [onclick_ $ "location.href='/browse'", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "chevrons-up"] "" <> span_ [class_ "ml-1"] "Top")
+            button_ [onclick_ "socket.send(\"update,\"+new URLSearchParams(window.location.search).get('path'))", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-4 stroke-2", data_ "feather" "refresh-ccw"] "" <> span_ [class_ "ml-1"] "Update")
             button_ [onclick_ "socket.send(\"addPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "" <> span_ [class_ "ml-1"] "Add all")
             button_ [onclick_ "socket.send(\"playPath,\"+new URLSearchParams(window.location.search).get('path'))", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-2", data_ "feather" "play"] "" <> span_ [class_ "ml-1"] "Play all")
         _ -> div_ ""
@@ -194,7 +195,7 @@ browsePage options user_config query_path = do
     mkIconField :: T.Text -> Html ()
     mkIconField icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
     mkQueueButtons :: T.Text -> Html ()
-    mkQueueButtons path = td_ [class_ "py-2 [&_button]:text-blue-400 [&_button]:hover:text-cyan-950 flex gap-x-2 md:gap-x-4"] $ do 
+    mkQueueButtons path = td_ [class_ "py-2 [&_button]:text-blue-400 [&_button]:hover:text-cyan-950 flex gap-x-2 md:gap-x-2"] $ do 
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
       button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
 
@@ -204,7 +205,7 @@ settingsPage options user_config = do
     div_ [class_ "ml-4 pb-10"] $ do
       p_ [class_ "text-2xl"] "Settings"
       button_ [id_ "updateAll", class_ "ml-4 bg-blue-500 hover:bg-blue-600 py-2 px-4 my-4 rounded text-white flex items-center gap-x-1"] $ "Update DB"
-      div_ [class_ "bg-slate-600 rounded ml-4 mr-8 mt-8 p-8 flex flex-col gap-y-4"] $ do
+      div_ [class_ "bg-slate-600 text-slate-300 rounded ml-4 mr-8 mt-8 p-8 flex flex-col gap-y-4"] $ do
           p_ $ do
             input_ [id_ "showArtistOnNavbar", type_ "checkbox", class_ "mr-2"]
             label_ [class_ ""] $ "Show artist name on nav bar player"

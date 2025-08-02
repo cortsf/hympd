@@ -35,6 +35,7 @@ data MPDCommand = Toggle
   | PlayPath String 
   | AddPath String 
   | SeekCur Int
+  | Update String
   deriving Show
 
 parseMsg :: String -> Either P.ParseError MPDCommand
@@ -74,7 +75,8 @@ parseCommandValue = do
              P.try (P.string "playId") P.<|> 
              P.try (P.string "playPath") P.<|> 
              P.try (P.string "addPath") P.<|>
-             P.try (P.string "seekCur")
+             P.try (P.string "seekCur") P.<|>
+             P.try (P.string "update")
   P.char ','
   value <- P.many1 $ P.anyChar
   P.eof
@@ -85,6 +87,7 @@ parseCommandValue = do
     "playPath" -> pure $ PlayPath $ value
     "addPath" -> pure $ AddPath $ value
     "seekCur" -> pure $ SeekCur $ read value
+    "update" -> pure $ Update $ value
 
 data ClientMessage = 
   -- Payload [MPD.Subsystem] MPD.Status (Maybe String)
@@ -165,6 +168,9 @@ streamData options pc = do
                                        ((sendError conn $ "Error: not playing") >> pure ())
                                        (\(_current_time, song_length) -> (liftIO $ MPD.withMPD $ MPD.seekCur True (((int2Double v)/100)*song_length)) >> pure ())
                                        (MPD.stTime mpdStatus))
+        Right (Update v) -> do
+          liftIO $ MPD.withMPD $ MPD.update $ Just $ fromString v
+          pure ()
         Left parse_error -> do
           sendError conn $ "Parse request error: " <> show parse_error
           pure ()

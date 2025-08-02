@@ -106,10 +106,10 @@ jsblock = T.show $ renderJs $
              document.querySelector('#currentSongTitle').innerHTML = currentSong.title;
              document.querySelector('#currentSongArtist').innerHTML = currentSong.artist;
              document.querySelector('#currentSongPath').innerHTML = currentSong.path;
-           } else {
-             document.querySelector('#currentSongTitle').innerHTML='';
-             document.querySelector('#currentSongArtist').innerHTML='';
-             document.querySelector('#currentSongPath').innerHTML='';
+           // } else {
+           //   document.querySelector('#currentSongTitle').innerHTML='';
+           //   document.querySelector('#currentSongArtist').innerHTML='';
+           //   document.querySelector('#currentSongPath').innerHTML='';
            };
          };
 
