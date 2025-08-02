@@ -208,8 +208,8 @@ settingsPage options user_config = do
       div_ [class_ "bg-slate-600 text-slate-300 rounded ml-4 mr-8 mt-8 p-8 flex flex-col gap-y-4"] $ do
           p_ $ do
             input_ [id_ "showArtistOnNavbar", type_ "checkbox", class_ "mr-2"]
-            label_ [class_ ""] $ "Show artist name on nav bar player"
+            label_ [class_ "", for_ "showArtistOnNavbar"] $ "Show artist name on nav bar player"
           p_ $ do
             input_ [id_ "showPathOnNavbar", type_ "checkbox", class_ "mr-2"]
-            label_ [class_ ""] $ "Show filepath on nav bar player"
+            label_ [class_ "", for_ "showPathOnNavbar"] $ "Show filepath on nav bar player"
           p_ [class_ "mt-4"] $ button_ [id_ "submitBtn", class_ "bg-blue-500 hover:bg-blue-600 rounded text-white px-4 py-2"] $ "Save config"
