@@ -212,4 +212,3 @@ settingsPage options user_config = do
           p_ $ do
             input_ [id_ "showPathOnNavbar", type_ "checkbox", class_ "mr-2"]
             label_ [class_ "", for_ "showPathOnNavbar"] $ "Show filepath on nav bar player"
-          p_ [class_ "mt-4"] $ button_ [id_ "submitBtn", class_ "bg-blue-500 hover:bg-blue-600 rounded text-white px-4 py-2"] $ "Save config"

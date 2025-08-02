@@ -198,7 +198,8 @@ jsblock = T.show $ renderJs $
          addEventListener("load", function () {
            if ( window.location.pathname == "/settings" ){
              document.querySelector('#updateAll').addEventListener('click', updateAll);
-             document.querySelector('#submitBtn').addEventListener('click', saveConfig);
+             document.querySelector('#showArtistOnNavbar').addEventListener('click', saveConfig);
+             document.querySelector('#showPathOnNavbar').addEventListener('click', saveConfig);
              setConfig();
            };
          });
