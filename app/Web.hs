@@ -202,13 +202,13 @@ browsePage options user_config query_path = do
 settingsPage :: Options -> Maybe UserConfig -> Handler (Html ())
 settingsPage options user_config = do
   page options (fromMaybe defaultUserConfig user_config) Settings $ do
-    div_ [class_ "ml-4 pb-10"] $ do
-      p_ [class_ "text-2xl"] "Settings"
-      button_ [id_ "updateAll", class_ "ml-4 bg-blue-500 hover:bg-blue-600 py-2 px-4 my-4 rounded text-white flex items-center gap-x-1"] $ "Update DB"
-      div_ [class_ "bg-slate-600 text-slate-300 rounded ml-4 mr-8 mt-8 p-8 flex flex-col gap-y-4"] $ do
-          p_ $ do
-            input_ [id_ "showArtistOnNavbar", type_ "checkbox", class_ "mr-2"]
-            label_ [class_ "", for_ "showArtistOnNavbar"] $ "Show artist name on nav bar player"
-          p_ $ do
-            input_ [id_ "showPathOnNavbar", type_ "checkbox", class_ "mr-2"]
-            label_ [class_ "", for_ "showPathOnNavbar"] $ "Show filepath on nav bar player"
+    p_ [class_ "ml-4 text-2xl"] "Settings"
+    div_ [class_ "mx-4 md:ml-8 md:mr-20 mpb-4"] $ do
+      button_ [id_ "updateAll", class_ "bg-blue-500 hover:bg-blue-600 py-2 px-4 my-4 rounded text-white flex items-center gap-x-1"] $ "Update DB"
+      div_ [class_ "mt-8 bg-slate-600 text-slate-300 rounded p-8 md:min-w-3/4 flex flex-col gap-y-4 justify-items-start w-fit "] $ do
+        p_ $ do
+          input_ [id_ "showArtistOnNavbar", type_ "checkbox", class_ "mr-2"]
+          label_ [class_ "", for_ "showArtistOnNavbar"] $ "Show artist name on nav bar player"
+        p_ $ do
+          input_ [id_ "showPathOnNavbar", type_ "checkbox", class_ "mr-2"]
+          label_ [class_ "", for_ "showPathOnNavbar"] $ "Show filepath on nav bar player"
