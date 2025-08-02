@@ -52,6 +52,7 @@ page options user_config current_page content = do
               Left _ -> Nothing
               Right Nothing -> Nothing
               Right msong -> currentSongFromSong <$> msong
+          playbackState = MPD.stState status
       pure $ doctypehtml_ $ html_ [lang_ "en"] $ do
         head_ $ do
           title_ "Hympd"
@@ -64,14 +65,14 @@ page options user_config current_page content = do
           meta_ [name_ "description", content_ "Hympd: MPD client"]
         body_ [class_ "overflow-y-scroll"] $ do
           div_ [class_ "min-h-screen bg-red-200 flex flex-col bg-white md:bg-gray-200 dark:bg-gray-900 text-slate-600 dark:text-slate-400 lg:text-base wrap-anywhere focus:outline-none"] $ do
-            nav_full current_page user_config current_song volume elapsed_time total_time playPause_icon
+            nav_full current_page user_config current_song volume elapsed_time total_time playbackState playPause_icon
             div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
               content
             script_ $ "feather.replace();"
           script_ $ jsblock
 
-nav_full :: CurrentPage -> UserConfig -> Maybe CurrentSong -> Integer -> String -> String -> String -> Html ()
-nav_full current_page user_config current_song volume elapsed_time total_time playPause_icon = do
+nav_full :: CurrentPage -> UserConfig -> Maybe CurrentSong -> Integer -> String -> String -> MPD.PlaybackState -> String -> Html ()
+nav_full current_page user_config current_song volume elapsed_time total_time playbackState playPause_icon = do
   nav_ [class_ "sticky top-0 w-full dark:text-blue-200 bg-slate-700 "] $ do
     div_ [class_ "max-w-screen-xl w-full flex block mx-auto lg:pt-4 px-2 lg:px-4 [&_.menuButton]:dark:hover:text-yellow-500"] $ do
       ul_ [class_ "font-medium flex flex-row space-x-8 w-full place-content-between lg:place-content-start"] $ do
@@ -82,9 +83,9 @@ nav_full current_page user_config current_song volume elapsed_time total_time pl
       div_ [class_ "px-2"] $ do
         div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex flex-col md:flex-row place-content-between text-md pt-1 pb-2"] $ do 
           div_ [id_ "currentSong", class_ "text-orange-200 lg:text-lg truncate"] $ maybe (p_ $ toHtmlRaw ("&nbsp;" :: String)) (\song -> do
-            p_ [id_ "currentSongTitle"] $ toHtmlRaw $ title song
-            p_ [id_ "currentSongArtist", classes_ (["text-xs"] <> (if showArtistOnNavbar user_config then ["block"] else ["hidden"]))] $ toHtmlRaw $ artist song
-            p_ [id_ "currentSongPath", classes_ (["text-xs"] <> (if showPathOnNavbar user_config then ["block"] else ["hidden"]))] $ toHtmlRaw $ path song
+            p_ [id_ "currentSongTitle"] $ if playbackState /= MPD.Stopped then toHtmlRaw $ title song else ""
+            p_ [id_ "currentSongArtist", classes_ (["text-xs"] <> (if showArtistOnNavbar user_config then ["block"] else ["hidden"]))] $ if playbackState /= MPD.Stopped then toHtmlRaw $ artist song else ""
+            p_ [id_ "currentSongPath", classes_ (["text-xs"] <> (if showPathOnNavbar user_config then ["block"] else ["hidden"]))] $ if playbackState /= MPD.Stopped then toHtmlRaw $ path song else ""
             ) current_song
           div_ [class_ "flex space-x-4 mt-4 lg:mt-0 text-orange-200 [&_.playerButton]:dark:hover:text-orange-400"] $ do
             button_ [id_ "navPrevious", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-back", class_ "size-6"] ""
