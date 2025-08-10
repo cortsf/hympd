@@ -2,7 +2,7 @@ Hympd - Simple [MPD](https://mpd.readthedocs.io/en/latest/) web interface
 
 - Minimalistic responsive design with dark and light color schemes.
 - Vim-like browser friendly.
-- [Easy to hack/customize with greasemonkey.](https://github.com/cortsf/hympd/wiki/Hacking-with-greasemonkey)
+- [Easy to hack/customize with greasemonkey.](https://github.com/cortsf/hympd/wiki/Hacking-with-userscripts)
 
 
 ## Screenshots
