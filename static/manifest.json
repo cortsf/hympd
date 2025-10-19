@@ -1,0 +1,36 @@
+{
+    "short_name": "Hympd",
+    "name": "Hympd MPD client",
+    "description": "Simple web client for the Music Player Daemon",
+    "id": "hympd",
+    "start_url": "/browse",
+    "display": "standalone",
+    "display_override": ["window-controls-overlay"],
+    "theme_color": "#000000",
+    "icons": [
+	{
+	    "src": "/static/favicon.png",
+	    "type": "image/png",
+	    "sizes": "512x512"
+	},
+	{
+	    "src": "/static/favicon_small.png",
+	    "type": "image/png",
+	    "sizes": "144x144"
+	}
+    ],
+    "screenshots": [
+	{
+	    "src": "/static/screenshot.png",
+	    "type": "image/png",
+	    "sizes": "660x938",
+	    "form_factor": "narrow"
+	},
+	{
+	    "src": "/static/screenshot.png",
+	    "type": "image/png",
+	    "sizes": "660x938",
+	    "form_factor": "wide"
+	}
+    ]
+}

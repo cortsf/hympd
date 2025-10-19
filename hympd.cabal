@@ -1,0 +1,52 @@
+cabal-version:      3.4
+name:               hympd
+version:            0.1.0.0
+synopsis:           MPD web interface.
+description:        Simple minimalistic web client to the Music Player Daemon.
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             Franco Cortesi
+maintainer:         cortesifranco3@gmail.com
+copyright:          Franco Cortesi
+category:           Web
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+
+common warnings
+    ghc-options: -Wall
+
+executable hympd
+    import:           warnings
+    main-is:          Main.hs
+    other-modules:    Javascript
+                    , Web
+                    , Stream
+    build-depends:    base ^>=4.20
+                    , servant
+                    , servant-server
+                    , servant-websockets
+                    , servant-lucid
+                    , servant-static-th
+                    , warp
+                    , wai
+                    , cookie
+                    , conduit
+                    , websockets
+                    , lucid
+                    , libmpd
+                    , optparse-applicative
+                    , text
+                    , aeson
+                    , jmacro
+                    , filepath
+                    , containers
+                    , parsec
+                    , time
+                    , pretty-simple
+                    , bytestring
+                    , uri-encode
+                    , utf8-string
+    hs-source-dirs:   app
+    default-language: GHC2024
+    extra-source-files:
+                        static
