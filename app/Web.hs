@@ -84,8 +84,8 @@ nav_full current_page user_config current_song volume elapsed_time total_time pl
         div_ [class_ "max-w-screen-xl w-full mx-auto px-4 flex flex-col md:flex-row place-content-between text-md pt-1 pb-2"] $ do 
           div_ [id_ "currentSong", class_ "text-orange-200 lg:text-lg truncate"] $ do
             p_ [id_ "currentSongTitle"] $ if playbackState /= MPD.Stopped then toHtmlRaw $ (maybe "" title current_song) else toHtmlRaw ("&nbsp;" :: String)
-            p_ [id_ "currentSongArtist", classes_ (["text-xs"] <> (if showArtistOnNavbar user_config then ["block"] else ["block"]))] $ if playbackState /= MPD.Stopped then (toHtmlRaw $ maybe "" artist current_song) else (toHtmlRaw ("&nbsp;" :: String))
-            p_ [id_ "currentSongPath", classes_ (["text-xs"] <> (if showPathOnNavbar user_config then ["block"] else ["block"]))] $ if playbackState /= MPD.Stopped then toHtmlRaw $ maybe "" path current_song else toHtmlRaw ( "&nbsp;" :: String)
+            p_ [id_ "currentSongArtist", classes_ (["text-xs"] <> (if showArtistOnNavbar user_config then ["block"] else ["hidden"]))] $ if playbackState /= MPD.Stopped then (toHtmlRaw $ maybe "" artist current_song) else (toHtmlRaw ("&nbsp;" :: String))
+            p_ [id_ "currentSongPath", classes_ (["text-xs"] <> (if showPathOnNavbar user_config then ["block"] else ["hidden"]))] $ if playbackState /= MPD.Stopped then toHtmlRaw $ maybe "" path current_song else toHtmlRaw ( "&nbsp;" :: String)
           div_ [class_ "flex space-x-4 mt-4 lg:mt-0 text-orange-200 [&_.playerButton]:dark:hover:text-orange-400"] $ do
             button_ [id_ "navPrevious", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "skip-back", class_ "size-6"] ""
             button_ [id_ "navStop", class_ "playerButton cursor-pointer block"] $ i_ [data_ "feather" "square", class_ "size-6"] ""
