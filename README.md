@@ -33,8 +33,6 @@ Then navigate in your browser to `http://localhost:<port_number>`
 
 #### Nixos service
 
-Hopefully Hympd will get into nixpkgs with service options. See [#5](/../../issues/5). In the mean time you can use:
-
 ``` nix
   systemd.user.services.hympd = {
     enable = true;
