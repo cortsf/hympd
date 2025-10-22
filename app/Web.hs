@@ -105,7 +105,7 @@ queuePage options user_config = do
   playlist <- liftIO $ withMpdOpt options $ MPD.playlistInfo Nothing
   page options (fromMaybe defaultUserConfig user_config) Queue $ do
     div_ [class_ "flex ml-4 mr-2"] $ do
-      span_ [class_ "text-2xl"] $ "Queue"
+      span_ [class_ "text-2xl hidden md:block"] $ "Queue"
     div_ [class_ "flex gap-x-1 md:gap-x-6 place-content-between lg:place-content-end ml-2 text-xs md:text-base mt-4 lg:mt-0"] $ do
         button_ [onclick_ "socket.send('consume')", id_ "btnConsume", class_ "py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "file-minus"] "" <> span_ [class_ "ml-1"] "Consume")
         button_ [onclick_ "socket.send('single')", id_ "btnSingle", class_ "py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "star"] "" <> span_ [class_ "ml-1"] "Single")
@@ -136,7 +136,7 @@ browsePage options user_config query_path = do
   page options (fromMaybe defaultUserConfig user_config) Browse $ do
     div_ [class_ "flex flex-col md:flex-row place-content-between ml-4 mr-2"] $ do
       div_ [class_ "place-content-start"] $ do
-        span_ [class_ "text-2xl"] $ "Browse"
+        span_ [class_ "text-2xl hidden md:block"] $ "Browse"
         mapM_ (\(path, padding, dir, index) -> 
                     if index < length dirlist then p_ [class_ "text-sm truncate"] $ (toHtmlRaw padding) <>  (a_ [class_ "text-blue-400 dark:text-slate-400 hover:dark:text-blue-400", href_ $ "/browse?path=" <> (U.encodeText $ T.pack path)] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir)
                     else p_ [class_ "text-sm"] $ (toHtmlRaw padding) <> (span_ [class_ "text-lime-400"] $ toHtmlRaw $ if index > 1 then ("&#10551;&nbsp;" <> dir) else dir)
@@ -201,7 +201,7 @@ browsePage options user_config query_path = do
 settingsPage :: Options -> Maybe UserConfig -> Handler (Html ())
 settingsPage options user_config = do
   page options (fromMaybe defaultUserConfig user_config) Settings $ do
-    p_ [class_ "ml-4 text-2xl"] "Settings"
+    p_ [class_ "ml-4 text-2xl hidden md:block"] "Settings"
     div_ [class_ "mx-4 md:ml-8 md:mr-20 mpb-4"] $ do
       button_ [id_ "updateAll", class_ "bg-blue-500 hover:bg-blue-600 py-2 px-4 my-4 rounded text-white flex items-center gap-x-1"] $ "Update DB"
       div_ [class_ "mt-8 bg-slate-600 text-slate-300 rounded px-8 py-10 min-w-full md:min-w-3/4 flex flex-col gap-y-8 justify-items-start w-fit "] $ do
