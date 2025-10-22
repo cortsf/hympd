@@ -8,17 +8,17 @@ Hympd - Simple [MPD](https://mpd.readthedocs.io/en/latest/) web interface
 ## Screenshots
 Desktop (light and dark color schemes):
 <p float="left">
-<img src="https://cortsf.github.io/hympd/desktop_queue_light.png" width="140" />
-<img src="https://cortsf.github.io/hympd/desktop_root_dark.png" width="140" />
-<img src="https://cortsf.github.io/hympd/desktop_album_dark.png" width="140" />
-<img src="https://cortsf.github.io/hympd/desktop_hints_dark2.png" width="140" />
+<img src="https://cortsf.github.io/hympd/v2_desktop_queue_light.png" width="140" />
+<img src="https://cortsf.github.io/hympd/v2_desktop_root_dark.png" width="140" />
+<img src="https://cortsf.github.io/hympd/v2_desktop_album_dark.png" width="140" />
+<img src="https://cortsf.github.io/hympd/v2_desktop_hints_dark2.png" width="140" />
 </p>
 
 Mobile (light color scheme)
 <p>
-<img src="https://cortsf.github.io/hympd/mobile_queue_light.jpeg" width="140" />
-<img src="https://cortsf.github.io/hympd/mobile_root_light.jpeg" width="140" />
-<img src="https://cortsf.github.io/hympd/mobile_album_light.jpeg" width="140" />
+<img src="https://cortsf.github.io/hympd/v2_mobile_queue_light.jpeg" width="140" />
+<img src="https://cortsf.github.io/hympd/v2_mobile_root_light.jpeg" width="140" />
+<img src="https://cortsf.github.io/hympd/v2_mobile_album_light.jpeg" width="140" />
 </p>
 
 ## Build/usage
