@@ -3,7 +3,7 @@ Hympd - Simple [MPD](https://mpd.readthedocs.io/en/latest/) web interface
 - Minimalistic responsive design with dark and light color schemes.
 - Vim-like browser friendly.
 - [Easy to hack/customize with userscripts (greasemonkey, tampermonkey, etc).](https://github.com/cortsf/hympd/wiki/Hacking-with-userscripts)
-- Self contained: Single binary file containing and providing <ins>**all**</ins> the static resources (css, js, icons) over http.
+- Self contained: Compiles into a single and independent statically linked executable file containing and providing <ins>**all**</ins> the static resources (css, js, icons) over http.
 
 
 ## Screenshots
@@ -24,13 +24,11 @@ Mobile (light color scheme)
 
 ## Build/usage
 
-``` bash
-nix build 
-./result/bin/hympd --port <port_number> [--mpd-host STRING] [--mpd-port INT] [--mpd-password STRING]
+1. Build statically linked binary using `nix build .#x86_64-unknown-linux-musl:hympd:exe:hympd` (linux only) or dynamically with `nix build` 
 
-```
+2. Execute with `./result/bin/hympd --port <port_number> [--mpd-host STRING] [--mpd-port INT] [--mpd-password STRING]`
 
-Then navigate in your browser to `http://localhost:<port_number>`
+3. Navigate to `http://localhost:<port_number>`
 
 #### Nixos service
 
@@ -41,7 +39,7 @@ Then navigate in your browser to `http://localhost:<port_number>`
     wantedBy = [ "default.target" ];
     script = ''/path/to/hympd/result/bin/hympd --port 3003'';
   };
-  networking.firewall.allowedTCPPorts = [ 3003 ]; # If you want access from other devices in you local network.
+  networking.firewall.allowedTCPPorts = [ 3003 ];.
 ```
 
 You may want to use a static IP so you can bookmark the url or create a native-like app in your phone. I personally use `networking.networkmanager.enable = true;` and set a static IP with `nmtui`.

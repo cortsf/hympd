@@ -23,7 +23,9 @@
           })
         ];
         pkgs = import nixpkgs { inherit system overlays; inherit (haskellNix) config; };
-        flake = pkgs.hixProject.flake {};
+        flake = pkgs.hixProject.flake {
+          crossPlatforms = p: [p.musl64];
+        };
       in flake // {
         legacyPackages = pkgs;
 
