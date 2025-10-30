@@ -53,6 +53,7 @@ data CurrentSong = CurrentSong {
 
 instance A.ToJSON CurrentSong
 
+
 currentSongFromSong :: MPD.Song -> CurrentSong
 currentSongFromSong song = CurrentSong {
   title = maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath song) (\x -> (mconcat (intersperse ", " (MPD.toString <$> x)))) (C.lookup MPD.Title (MPD.sgTags song))
@@ -93,3 +94,21 @@ instance A.ToJSON MPD.Id where
   toJSON (MPD.Id v) = A.String $ T.pack $ show v
 
 instance A.ToJSON MPD.Status
+
+
+deriving instance G.Generic MPD.Metadata
+instance FromHttpApiData MPD.Metadata where
+  parseUrlPiece v = case T.unpack v of
+    "album" -> Right MPD.Album
+    "artist" -> Right MPD.Artist
+    "genre" -> Right MPD.Genre
+    "title" -> Right MPD.Title
+    _ -> Left $ (T.pack "Cant parse: ") <> v
+
+data OP = Matches | Contains | Regex deriving (Show, Eq)
+instance FromHttpApiData OP where
+  parseUrlPiece v = case T.unpack v of
+    "matches" -> Right Matches
+    "contains" -> Right Contains
+    "regex" -> Right Regex
+    _ -> Left $ T.pack "Cant parse: " <> v

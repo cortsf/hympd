@@ -29,7 +29,7 @@ import System.FilePath.Posix qualified as FP
 -- Common
 ------------------------------------------------------------
 
-data CurrentPage = Queue | Browse | Settings deriving Eq
+data CurrentPage = Queue | Browse | Search | Settings deriving Eq
 
 page :: Options -> UserConfig -> CurrentPage -> Html () -> Handler (Html ())
 page options user_config current_page content = do
@@ -75,9 +75,10 @@ nav_full :: CurrentPage -> UserConfig -> Maybe CurrentSong -> Integer -> String 
 nav_full current_page user_config current_song volume elapsed_time total_time playbackState playPause_icon = do
   nav_ [class_ "sticky top-0 w-full dark:text-blue-200 bg-slate-700 "] $ do
     div_ [class_ "max-w-screen-xl w-full flex block mx-auto lg:pt-4 px-2 lg:px-4 [&_.menuButton]:dark:hover:text-yellow-500"] $ do
-      ul_ [class_ "font-medium flex flex-row space-x-8 w-full place-content-between lg:place-content-start"] $ do
+      ul_ [class_ "font-medium flex flex-row md:space-x-8 w-full place-content-between lg:place-content-start"] $ do
         li_ $ a_ [href_ "/queue", classes_ [if current_page == Queue then "text-yellow-500" else "hover:text-blue-200 text-blue-200 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:p-0"]] "Queue"
         li_ $ a_ [href_ "/browse", classes_ [if current_page == Browse then "text-yellow-500" else "hover:text-blue-200 text-blue-200 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:p-0"]] "Browse"
+        li_ $ a_ [href_ "/search", classes_ [if current_page == Search then "text-yellow-500" else "hover:text-blue-200 text-blue-200 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:p-0"]] "Search"
         li_ $ a_ [href_ "/settings", classes_ [if current_page == Settings then "text-yellow-500" else "hover:text-blue-200 text-blue-200 dark:text-blue-200 menuButton", "block py-2 px-3 rounded-sm lg:p-0"]] "Settings"
     div_ [class_ "w-full mx-auto pb-2 lg:pt-2"] $ do
       div_ [class_ "px-2"] $ do
@@ -183,7 +184,6 @@ browsePage options user_config query_path = do
                                       (MPD.LsDirectory _, MPD.LsPlaylist _) -> LT
                                       (MPD.LsDirectory _, MPD.LsDirectory _) -> EQ
                                  ) res)
-      
   where
     mkPathList :: [String] -> [String]
     mkPathList [] = []
@@ -197,6 +197,73 @@ browsePage options user_config query_path = do
     mkQueueButtons path = td_ [class_ "py-2 [&_button]:text-blue-400 [&_button]:hover:text-cyan-950 flex gap-x-2 md:gap-x-2"] $ do 
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
       button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
+
+searchPage :: Options -> Maybe UserConfig -> Maybe MPD.Metadata -> Maybe OP -> Maybe String -> Handler (Html ())
+searchPage options user_config tag op query = do 
+  liftIO $ putStrLn $ show op
+  liftIO $ putStrLn $ show query
+  let operator = case op of
+        Nothing -> (MPD.=?)
+        Just Matches -> (MPD.=?)
+        Just Contains -> (MPD.%?)
+        Just Regex -> (MPD.~?)
+  case (query, tag) of
+   (Just q, Just t) ->  do
+     mpdResult <- liftIO $ withMpdOpt options $ MPD.search $ operator t (fromString q)
+     page options (fromMaybe defaultUserConfig user_config) Search $ do
+       mkHeader
+       div_ [class_ "flex gap-x-1 md:gap-x-6 place-content-between lg:place-content-end text-xs md:text-base mt-4 lg:mt-0"] $ do
+         case mpdResult of
+           Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
+           Right res -> table_ [class_ "table-auto w-full mt-2 lg:mt-4"] $ do
+             tbody_ $ mapM_ (\item -> tr_ [class_ "hover:bg-sky-100 flex place-content-between px-2 my-0"] $ do
+                                    mkIconField "music"
+                                    td_ [class_ "pl-4 py-2 overflow-hidden grow flex place-content-between"] $ do
+                                      div_ $ toHtml $ maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath item) (\x -> maybe "No title metadata" (FP.takeFileName . MPD.toString) (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags item))
+                                      div_ [class_ "px-4"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength item > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength item
+                                    mkQueueButtons(T.pack $ MPD.toString $ MPD.sgFilePath item)
+                            ) res
+   _ -> page options (fromMaybe defaultUserConfig user_config) Search $ do
+     mkHeader
+  where
+    mkIconField :: T.Text -> Html ()
+    mkIconField icon = td_ [class_ "text-slate-400 flex items-center"] $ i_ [class_ "size-4", data_ "feather" icon] ""
+    mkQueueButtons :: T.Text -> Html ()
+    mkQueueButtons path = td_ [class_ "py-2 [&_button]:text-blue-400 [&_button]:hover:text-cyan-950 flex gap-x-2 md:gap-x-2"] $ do 
+      a_ [href_ $ "/browse?path=" <> path, class_ "pl-0 pr-4 w-1 cursor-pointer my-auto"] $ i_ [class_ "size-4 stroke-3", data_ "feather" "search"] ""
+      button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
+      button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
+    mkHeader :: Html ()
+    mkHeader = div_ [class_ "flex flex-col mx-4"] $ do
+      span_ [class_ "text-2xl hidden md:block"] $ toHtml $ T.pack "Search"
+      div_ [class_ "my-2 px-4 py-4 bg-emerald-800 rounded-lg text-gray-300"] $ do
+        form_  [ action_ "/search"] $ do
+          div_ [class_ "flex gap-x-4" ] $ do 
+            span_ $ do
+              input_ $ [ required_ "true", id_ "title", type_ "radio", name_ "tag", value_ "title", class_ "outline-none"] <> if tag == Nothing || tag == Just MPD.Title then [checked_] else []
+              label_ [for_ "title", class_ "mx-2 text-sm md:text-base"] "Title"
+            span_ $ do
+              input_ $ [ required_ "true",  id_ "artist", type_ "radio", name_ "tag", value_ "artist", class_ "outline-none"] <> if tag == Just MPD.Artist then [checked_] else []
+              label_ [for_ "artist", class_ "mx-2 text-sm md:text-base"] "Artist"
+            span_ $ do
+              input_ $ [ required_ "true",  id_ "album", type_ "radio", name_ "tag", value_ "album", class_ "outline-none"] <> if tag == Just MPD.Album then [checked_] else []
+              label_ [for_ "album", class_ "mx-2 text-sm md:text-base"] "Album"
+            span_ $ do
+              input_ $ [ required_ "true",  id_ "genre", type_ "radio", name_ "tag", value_ "genre", class_ "outline-none"] <> if tag == Just MPD.Genre then [checked_] else []
+              label_ [for_ "genre", class_ "mx-2 text-sm md:text-base"] "Genre"
+          div_ [class_ "flex gap-x-4" ] $ do 
+            span_ $ do
+              input_ $ [ required_ "true", id_ "matches", type_ "radio", name_ "op", value_ "matches", class_ "outline-none"] <> if op == Nothing || op == Just Matches then [checked_] else []
+              label_ [for_ "matches", class_ "mx-2 text-sm md:text-base"] "Matches"
+            span_ $ do
+              input_ $ [ required_ "true",  id_ "contains", type_ "radio", name_ "op", value_ "contains", class_ "outline-none"] <> if op == Just Contains then [checked_] else []
+              label_ [for_ "contains", class_ "mx-2 text-sm md:text-base"] "Contains"
+            span_ $ do
+              input_ $ [ required_ "true",  id_ "regex", type_ "radio", name_ "op", value_ "regex", class_ "outline-none"] <> if op == Just Regex then [checked_] else []
+              label_ [for_ "regex", class_ "mx-2 text-sm md:text-base"] "Regex"
+          div_ [class_ "flex"] $ do
+            input_ [ type_ "text", name_ "query", required_ "true", class_ "bg-emerald-900 outline-none mt-2 px-2 py-1 rounded-lg", value_ $ T.pack $ fromMaybe "" query]
+            input_ [ type_ "submit", class_ "bg-emerald-600 text-yellow-300 outline-none font-semibold mt-2 px-2 py-1 rounded-lg mx-4 ", value_ "Search"]
 
 settingsPage :: Options -> Maybe UserConfig -> Handler (Html ())
 settingsPage options user_config = do

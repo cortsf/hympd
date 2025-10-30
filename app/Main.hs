@@ -25,6 +25,7 @@ import Lucid
 import Servant.HTML.Lucid
 import Servant.API.WebSocket
 import Options.Applicative
+import Network.MPD qualified as MPD
 import Servant.Static.TH qualified as SS
 
 -- * Static
@@ -76,6 +77,7 @@ type WebApi =
   Header "Cookie" UserConfig :> Get '[HTML] (Html ()) :<|>
   "queue" :> Header "Cookie" UserConfig :> Get '[HTML] (Html ()) :<|>
   "browse" :> Header "Cookie" UserConfig :> QueryParam "path" String :> Get '[HTML] (Html ()) :<|>
+  "search" :> Header "Cookie" UserConfig :> QueryParam "tag" MPD.Metadata :> QueryParam "op" OP :> QueryParam "query" String :> Get '[HTML] (Html ()) :<|>
   "settings" :> Header "Cookie" UserConfig :> Get '[HTML] (Html ()) :<|>
   "websocket" :> WebSocketPending :<|>
   "static" :> StaticAPI
@@ -90,6 +92,7 @@ server options =
   (queuePage options) :<|> 
   (queuePage options) :<|> 
   (browsePage options) :<|> 
+  (searchPage options) :<|> 
   (settingsPage options) :<|> 
   (streamData options) :<|> 
   staticServer

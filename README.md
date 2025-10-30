@@ -7,19 +7,21 @@ Hympd - Simple [MPD](https://mpd.readthedocs.io/en/latest/) web interface
 
 
 ## Screenshots
-Desktop (light and dark color schemes):
+Desktop (dark color scheme):
 <p float="left">
-<img src="https://cortsf.github.io/hympd/v2_desktop_queue_light.png" width="140" />
-<img src="https://cortsf.github.io/hympd/v2_desktop_root_dark.png" width="140" />
-<img src="https://cortsf.github.io/hympd/v2_desktop_album_dark.png" width="140" />
-<img src="https://cortsf.github.io/hympd/v2_desktop_hints_dark2.png" width="140" />
+<img src="https://cortsf.github.io/hympd/v3_desktop_queue.png" width="140" />
+<img src="https://cortsf.github.io/hympd/v3_desktop_root.png" width="140" />
+<img src="https://cortsf.github.io/hympd/v3_desktop_album.png" width="140" />
+<img src="https://cortsf.github.io/hympd/v3_desktop_search.png" width="140" />
+<img src="https://cortsf.github.io/hympd/v3_desktop_hints.png" width="140" />
 </p>
 
 Mobile (light color scheme)
 <p>
-<img src="https://cortsf.github.io/hympd/v2_mobile_queue_light.jpeg" width="140" />
-<img src="https://cortsf.github.io/hympd/v2_mobile_root_light.jpeg" width="140" />
-<img src="https://cortsf.github.io/hympd/v2_mobile_album_light.jpeg" width="140" />
+<img src="https://cortsf.github.io/hympd/v3_mobile_queue.jpeg" width="140" />
+<img src="https://cortsf.github.io/hympd/v3_mobile_root.jpeg" width="140" />
+<img src="https://cortsf.github.io/hympd/v3_mobile_album.jpeg" width="140" />
+<img src="https://cortsf.github.io/hympd/v3_mobile_search.jpeg" width="140" />
 </p>
 
 ## Build/usage
