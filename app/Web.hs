@@ -64,9 +64,9 @@ page options user_config current_page content = do
           meta_ [name_ "viewport", content_ "width=device-width, initial-scale=1.0"]
           meta_ [name_ "description", content_ "Hympd: MPD client"]
         body_ [class_ "overflow-y-scroll"] $ do
-          div_ [class_ "min-h-screen bg-red-200 flex flex-col bg-white md:bg-gray-200 dark:bg-gray-900 text-slate-600 dark:text-slate-400 lg:text-base wrap-anywhere focus:outline-none"] $ do
+          div_ [class_ "min-h-screen flex flex-col bg-white md:bg-gray-200 dark:bg-gray-900 text-slate-600 dark:text-slate-400 lg:text-base wrap-anywhere focus:outline-none"] $ do
             nav_full current_page user_config current_song volume elapsed_time total_time playbackState playPause_icon
-            div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto pt-4 bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
+            div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
               content
             script_ $ "feather.replace();"
           script_ $ jsblock
@@ -105,7 +105,7 @@ queuePage :: Options -> Maybe UserConfig -> Handler (Html ())
 queuePage options user_config = do
   playlist <- liftIO $ withMpdOpt options $ MPD.playlistInfo Nothing
   page options (fromMaybe defaultUserConfig user_config) Queue $ do
-    div_ [class_ "flex ml-4 mr-2"] $ do
+    div_ [class_ "flex ml-4 mr-2 pt-2"] $ do
       span_ [class_ "text-2xl hidden md:block"] $ "Queue"
     div_ [class_ "flex gap-x-1 md:gap-x-6 place-content-between lg:place-content-end ml-2 text-xs md:text-base mt-4 lg:mt-0"] $ do
         button_ [onclick_ "socket.send('consume')", id_ "btnConsume", class_ "py-1 rounded-md text-slate-400 cursor-pointer flex items-center"] (i_ [class_ "size-5 stroke-2", data_ "feather" "file-minus"] "" <> span_ [class_ "ml-1"] "Consume")
@@ -135,7 +135,7 @@ browsePage options user_config query_path = do
   let dirlist = FP.splitDirectories $ maybe "" (fromString . id) query_path
   mpdResult <- liftIO $ withMpdOpt options $ MPD.lsInfo $ maybe "" (fromString . id) query_path
   page options (fromMaybe defaultUserConfig user_config) Browse $ do
-    div_ [class_ "flex flex-col md:flex-row place-content-between ml-4 mr-2"] $ do
+    div_ [class_ $ "flex flex-col md:flex-row place-content-between ml-4 mr-2 pt-2" <> if query_path == Nothing then " hidden md:block" else ""] $ do
       div_ [class_ "place-content-start"] $ do
         span_ [class_ "text-2xl hidden md:block"] $ "Browse"
         mapM_ (\(path, padding, dir, index) -> 
@@ -145,7 +145,7 @@ browsePage options user_config query_path = do
           [1 .. length dirlist]
       case query_path of
         Just (_x:_xs) -> do
-          div_ [class_ "mt-4 md:mt-4 lg:items-end items-center flex place-content-around lg:place-content-end md:gap-x-6 [&_button]:text-slate-400 [&_button]:hover:text-slate-200"] $ do
+          div_ [class_ "mt-4 md:mt-4 mb-4 md:mb-0 lg:items-end items-center flex place-content-around lg:place-content-end md:gap-x-6 [&_button]:text-slate-400 [&_button]:hover:text-slate-200"] $ do
             button_ [onclick_ $ "location.href='/browse" <> (if length dirlist > 1 then T.pack $ "?path=" <> (mconcat $ intersperse "/" (init dirlist)) else "") <> "'", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "corner-left-up"] "" <> span_ [class_ "ml-1"] "Up")
             button_ [onclick_ $ "location.href='/browse'", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-5 stroke-3", data_ "feather" "chevrons-up"] "" <> span_ [class_ "ml-1"] "Top")
             button_ [onclick_ "socket.send(\"update,\"+new URLSearchParams(window.location.search).get('path'))", class_ "rounded-md text-white cursor-pointer flex items-center"] $ (i_ [class_ "size-4 stroke-2", data_ "feather" "refresh-ccw"] "" <> span_ [class_ "ml-1"] "Update")
@@ -154,7 +154,7 @@ browsePage options user_config query_path = do
         _ -> div_ ""
     case mpdResult of
       Left e -> p_ "Browse error" <> p_ (toHtml $ show e)
-      Right res -> table_ [class_ "table-auto w-full mt-2 lg:mt-4"] $ do
+      Right res -> table_ [class_ "table-auto w-full lg:mt-4"] $ do
         tbody_ $ mapM_ (\item -> tr_ [class_ "hover:bg-sky-100 flex place-content-between px-2 my-0"] $ do
                            case item of
                              MPD.LsDirectory path -> do
@@ -220,7 +220,7 @@ searchPage options user_config tag op query = do
                                     mkIconField "music"
                                     td_ [class_ "pl-4 py-2 overflow-hidden grow flex place-content-between"] $ do
                                       div_ $ toHtml $ maybe (FP.takeBaseName $ MPD.toString $ MPD.sgFilePath item) (\x -> maybe "No title metadata" (FP.takeFileName . MPD.toString) (listToMaybe x)) (C.lookup MPD.Title (MPD.sgTags item))
-                                      div_ [class_ "px-4"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength item > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength item
+                                      div_ [class_ "px-4 hidden md:block"] $ toHtml $ formatTime defaultTimeLocale (if MPD.sgLength item > 3600 then "%H:%M:%S" else "%M:%S") $ posixSecondsToUTCTime $ fromIntegral $ MPD.sgLength item
                                     mkQueueButtons(T.pack $ MPD.toString $ MPD.sgFilePath item)
                             ) res
    _ -> page options (fromMaybe defaultUserConfig user_config) Search $ do
@@ -234,7 +234,7 @@ searchPage options user_config tag op query = do
       button_ [onclick_ $ "socket.send('addPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "plus"] "__"
       button_ [onclick_ $ "socket.send('playPath," <> path <> "')", class_ "cursor-pointer"] $ i_ [class_ "size-5 stroke-3", data_ "feather" "play"] "__"
     mkHeader :: Html ()
-    mkHeader = div_ [class_ "flex flex-col mx-4"] $ do
+    mkHeader = div_ [class_ "flex flex-col mx-4 mt-2"] $ do
       span_ [class_ "text-2xl hidden md:block"] $ toHtml $ T.pack "Search"
       div_ [class_ "my-2 px-4 py-4 bg-emerald-800 rounded-lg text-gray-300"] $ do
         form_  [ action_ "/search"] $ do
@@ -268,13 +268,20 @@ searchPage options user_config tag op query = do
 settingsPage :: Options -> Maybe UserConfig -> Handler (Html ())
 settingsPage options user_config = do
   page options (fromMaybe defaultUserConfig user_config) Settings $ do
-    p_ [class_ "ml-4 text-2xl hidden md:block"] "Settings"
+    p_ [class_ "ml-4 text-2xl hidden md:block mt-2"] "Settings"
     div_ [class_ "mx-4 md:ml-8 md:mr-20 mpb-4"] $ do
-      button_ [id_ "updateAll", class_ "bg-blue-500 hover:bg-blue-600 py-2 px-4 my-4 rounded text-white flex items-center gap-x-1"] $ "Update DB"
-      div_ [class_ "mt-8 bg-slate-600 text-slate-300 rounded px-8 py-10 min-w-full md:min-w-3/4 flex flex-col gap-y-8 justify-items-start w-fit "] $ do
-        p_ $ do
-          input_ [id_ "showArtistOnNavbar", type_ "checkbox", class_ "mr-2"]
-          label_ [class_ "", for_ "showArtistOnNavbar"] $ "Show artist name on nav bar player"
-        p_ $ do
-          input_ [id_ "showPathOnNavbar", type_ "checkbox", class_ "mr-2"]
-          label_ [class_ "", for_ "showPathOnNavbar"] $ "Show filepath on nav bar player"
+      div_ [class_ "mt-4 bg-slate-600 text-slate-300 rounded px-8 py-4 min-w-full md:min-w-3/4 flex flex-col justify-items-start w-fit "] $ do
+        h1_ [class_ "text-xl"] $ "User interface"
+        hr_ [class_ "h-1 my-4 border-0 bg-gray-400 dark:bg-gray-500"]
+        div_ [class_ "flex flex-col gap-y-8 "] $ do
+          p_ $ do
+            input_ [id_ "showArtistOnNavbar", type_ "checkbox", class_ "mr-2"]
+            label_ [class_ "", for_ "showArtistOnNavbar"] $ "Show artist name on nav bar player"
+          p_ $ do
+            input_ [id_ "showPathOnNavbar", type_ "checkbox", class_ "mr-2"]
+            label_ [class_ "", for_ "showPathOnNavbar"] $ "Show filepath on nav bar player"
+      div_ [class_ "mt-4 bg-slate-600 text-slate-300 rounded px-8 py-4 min-w-full md:min-w-3/4 flex flex-col justify-items-start w-fit "] $ do
+        h1_ [class_ "text-xl"] $ "Backend"
+        hr_ [class_ "h-1 my-4 border-0 bg-gray-400 dark:bg-gray-500"]
+        div_ $ do
+          button_ [id_ "updateAll", class_ "bg-blue-500 hover:bg-blue-600 py-2 px-4 my-4 rounded text-white flex items-center gap-x-1"] $ "Update DB"
