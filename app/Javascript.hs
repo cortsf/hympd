@@ -32,6 +32,7 @@ jsblock = T.show $ renderJs $
          function saveConfig() {
            setCookie('showArtistOnNavbar', document.querySelector('#showArtistOnNavbar').checked);
            setCookie('showPathOnNavbar', document.querySelector('#showPathOnNavbar').checked);
+           setCookie('useDark', document.querySelector('#useDark').checked);
            location.reload()
          };
 
@@ -153,13 +154,14 @@ jsblock = T.show $ renderJs $
          }
 
          function setConfig() {
-           var showArtistOnNavbar = getCookie("showArtistOnNavbar");
-           var showPathOnNavbar = getCookie("showPathOnNavbar");
-           if(showArtistOnNavbar == 'true'){
+           if(getCookie("showArtistOnNavbar") == 'true'){
              document.querySelector('#showArtistOnNavbar').checked = true;
            };
-           if(showPathOnNavbar == 'true'){
+           if(getCookie("showPathOnNavbar") == 'true'){
              document.querySelector('#showPathOnNavbar').checked = true;
+           };
+           if(getCookie("useDark") == 'true'){
+             document.querySelector('#useDark').checked = true;
            };
          };
 
@@ -200,6 +202,7 @@ jsblock = T.show $ renderJs $
              document.querySelector('#updateAll').addEventListener('click', updateAll);
              document.querySelector('#showArtistOnNavbar').addEventListener('click', saveConfig);
              document.querySelector('#showPathOnNavbar').addEventListener('click', saveConfig);
+             document.querySelector('#useDark').addEventListener('click', saveConfig);
              setConfig();
            };
          });

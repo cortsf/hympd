@@ -53,10 +53,10 @@ page options user_config current_page content = do
               Right Nothing -> Nothing
               Right msong -> currentSongFromSong <$> msong
           playbackState = MPD.stState status
-      pure $ doctypehtml_ $ html_ [lang_ "en"] $ do
+      pure $ doctypehtml_ $ html_ ([lang_ "en"] <> [class_ $ if useDark user_config then "dark" else "light"])$ do
         head_ $ do
           title_ "Hympd"
-          script_ [src_ "/static/styles.js"] ("" :: String)
+          link_ [href_ "../static/styles.css", rel_ "stylesheet"]
           script_ [src_ "/static/icons.js"] ("" :: String)
           link_ [rel_ "icon", href_ "/static/favicon.png", sizes_ "any", type_ "image/png"]
           link_ [rel_ "manifest", href_ "/static/manifest.json"]
@@ -280,6 +280,9 @@ settingsPage options user_config = do
           p_ $ do
             input_ [id_ "showPathOnNavbar", type_ "checkbox", class_ "mr-2"]
             label_ [class_ "", for_ "showPathOnNavbar"] $ "Show filepath on nav bar player"
+          p_ $ do
+            input_ [id_ "useDark", type_ "checkbox", class_ "mr-2"]
+            label_ [class_ "", for_ "useDark"] $ "Use dark theme"
       div_ [class_ "mt-4 bg-slate-600 text-slate-300 rounded px-8 py-4 min-w-full md:min-w-3/4 flex flex-col justify-items-start w-fit "] $ do
         h1_ [class_ "text-xl"] $ "Backend"
         hr_ [class_ "h-1 my-4 border-0 bg-gray-400 dark:bg-gray-500"]

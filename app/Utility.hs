@@ -27,6 +27,7 @@ data Options = Options
 data UserConfig = UserConfig {
   showArtistOnNavbar :: Bool
   , showPathOnNavbar :: Bool
+  , useDark :: Bool
   } deriving (Show, G.Generic)
 
 instance A.ToJSON UserConfig
@@ -35,6 +36,7 @@ defaultUserConfig :: UserConfig
 defaultUserConfig = UserConfig {
   showArtistOnNavbar = False
   , showPathOnNavbar = False
+  , useDark = False
   }
 
 instance FromHttpApiData UserConfig where
@@ -43,6 +45,7 @@ instance FromHttpApiData UserConfig where
     pure $ UserConfig {
     showArtistOnNavbar = maybe False ((==) (BSU.fromString "true")) $ lookup (BSU.fromString "showArtistOnNavbar") $ cookies
     , showPathOnNavbar = maybe False ((==) (BSU.fromString "true")) $ lookup (BSU.fromString "showPathOnNavbar") $ cookies
+    , useDark = maybe False ((==) (BSU.fromString "true")) $ lookup (BSU.fromString "useDark") $ cookies
     }
 
 data CurrentSong = CurrentSong {
