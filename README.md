@@ -3,7 +3,7 @@ Hympd - Simple [MPD](https://mpd.readthedocs.io/en/latest/) web interface
 - Minimalistic responsive design with dark and light color schemes.
 - Vim-like browser friendly.
 - [Easy to hack/customize with userscripts (greasemonkey, tampermonkey, etc).](https://github.com/cortsf/hympd/wiki/Hacking-with-userscripts)
-- Self contained: Compiles into a single and independent statically linked executable file containing and providing <ins>**all**</ins> the static resources (css, js, icons) over http.
+- No runtime deps: Compiles into a single and independent statically linked executable file containing and providing <ins>**all**</ins> the static resources (css, js, icons) over http.
 
 
 ## Screenshots
@@ -26,9 +26,9 @@ Mobile (light color scheme)
 
 ## Build/usage
 
-1. Build statically linked binary using `nix build .#x86_64-unknown-linux-musl:hympd:exe:hympd` (linux only) or dynamically with `nix build` 
+1. Download latest binary [release](https://github.com/cortsf/hympd/releases), or build a statically linked binary using `nix build .#x86_64-unknown-linux-musl:hympd:exe:hympd` (linux only, build dynamically with `nix build` otherwise)
 
-2. Execute with `./result/bin/hympd --port <port_number> [--mpd-host STRING] [--mpd-port INT] [--mpd-password STRING]`
+2. Execute with `./result/bin/hympd --port <port_number> [--mpd-host STRING] [--mpd-port INT] [--mpd-password STRING]`. Since there are no runtime deps, the relative location of the static resources (css, js and icons) is not relevant.
 
 3. Navigate to `http://localhost:<port_number>`
 
