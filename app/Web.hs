@@ -66,7 +66,7 @@ page options user_config current_page content = do
         body_ [class_ "overflow-y-scroll"] $ do
           div_ [class_ "min-h-screen flex flex-col bg-white md:bg-gray-200 dark:bg-gray-900 text-slate-600 dark:text-slate-400 lg:text-base wrap-anywhere focus:outline-none"] $ do
             nav_full current_page user_config current_song volume elapsed_time total_time playbackState playPause_icon
-            div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:dark:hover:bg-sky-900"] $ do
+            div_ [id_ "content", class_ "overflow-y-visible max-w-screen-xl w-full grow flex flex-col mx-auto bg-white dark:bg-slate-800 [&_tr]:odd:bg-slate-50 [&_tr]:odd:dark:bg-slate-700 [&_tr]:even:bg-white [&_tr]:even:dark:bg-slate-800 [&_tr]:hover:bg-orange-100 [&_tr]:dark:hover:bg-sky-900"] $ do
               content
             script_ $ "feather.replace();"
           script_ $ jsblock
