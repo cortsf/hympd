@@ -1,5 +1,5 @@
 {pkgs, ...}: {
-  compiler-nix-name = "ghc910";
+  compiler-nix-name = "ghc98";
 
   crossPlatforms = p: pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
     p.musl64

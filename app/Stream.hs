@@ -100,7 +100,7 @@ instance A.ToJSON MPD.Subsystem
 
 instance A.ToJSON ClientMessage where
     toEncoding = A.genericToEncoding $ 
-      A.defaultOptions { A.sumEncoding = A.TaggedObject { tagFieldName = "payloadType", contentsFieldName = "payload" }}
+      A.defaultOptions { A.sumEncoding = A.TaggedObject { A.tagFieldName = "payloadType", A.contentsFieldName = "payload" }}
 
 streamData :: MonadIO m => Options -> WS.PendingConnection -> m ()
 streamData options pc = do

@@ -14,6 +14,7 @@ extra-doc-files:    CHANGELOG.md
 
 common warnings
     ghc-options: -Wall
+                 -threaded
 
 executable hympd
     import:           warnings
@@ -21,7 +22,7 @@ executable hympd
     other-modules:    Javascript
                     , Web
                     , Stream
-    build-depends:    base ^>=4.20
+    build-depends:    base >= 4.19 && < 4.21
                     , servant
                     , servant-server
                     , servant-websockets
@@ -47,6 +48,7 @@ executable hympd
                     , uri-encode
                     , utf8-string
     hs-source-dirs:   app
-    default-language: GHC2024
-    extra-source-files:
-                        static
+    default-language: GHC2021
+
+extra-source-files:
+    static

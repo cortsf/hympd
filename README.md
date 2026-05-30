@@ -32,6 +32,8 @@ Mobile (light color scheme)
 
 3. Navigate to `http://localhost:<port_number>`
 
+Note: Building on darwing has not been tested by the author of this package. With some nix tweaks, it should/could be possible to cross-compile a windows executable.
+
 #### Nixos service
 
 ``` nix

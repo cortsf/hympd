@@ -4,7 +4,7 @@ import Language.Javascript.JMacro
 import Data.Text as T
 
 jsblock :: T.Text
-jsblock = T.show $ renderJs $ 
+jsblock = T.pack $ show $ renderJs $
   [jmacro| 
          ///////////////////////////////// Global vars
          
