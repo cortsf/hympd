@@ -116,14 +116,12 @@ jsblock = T.show $ renderJs $
 
          function highlightCurrentSongOnQueue (stSongID, stState) { 
            var current_item_classes = ["text-amber-500", "dark:text-orange-300"];
-           if ( window.location.pathname == "/queue" ){
              if(stState == "Stopped"){
                document.querySelectorAll(".song-item").forEach(function(x){swapClasses(true, [], current_item_classes, x)});
              } else {
                document.querySelectorAll(".song-item").forEach(function(x){swapClasses(true, [], current_item_classes, x)});
                swapClasses(true, current_item_classes, [], document.querySelector("button[data-songId='"+stSongID+"']").parentNode);
              };
-           };
          };
 
          function setPlaybackState (stState) { 
@@ -147,9 +145,9 @@ jsblock = T.show $ renderJs $
            setProgress(status.stTime, status.stState);
            setVolume(status.stVolume);
            setPlaybackState(status.stState);
-           highlightCurrentSongOnQueue(status.stSongID, status.stState);
-           if(window.location.pathname == "/queue"){
-            setQueueButtons(status);
+           if(window.location.pathname == "/" || window.location.pathname == "/queue"){
+             highlightCurrentSongOnQueue(status.stSongID, status.stState);
+             setQueueButtons(status);
            };
          }
 
@@ -173,7 +171,7 @@ jsblock = T.show $ renderJs $
            document.querySelector('#navStop').addEventListener('click', function (){socket.send('stop')}, false);
            document.querySelector('#navPlayPause').addEventListener('click', function (){socket.send('toggle')}, false);
            document.querySelector('#navNext').addEventListener('click', function () {socket.send('next')}, false);
-           addEventListener("visibilitychange", function () {if(!document.hidden){socket.send('status');};});
+           addEventListener("visibilitychange", function () {if((document.visibilityState === "visible")){socket.send('status');};});
            socket.send('status')
          };
 
