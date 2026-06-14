@@ -4,6 +4,9 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   outputs = { self, nixpkgs, flake-utils, haskellNix }:
     let
+      gitRev = if self ? dirtyRev && self.dirtyRev != null 
+               then "dirty" 
+               else self.rev or "unknown";
       supportedSystems = [
         "x86_64-linux"
         "x86_64-darwin"
@@ -19,6 +22,13 @@
               final.haskell-nix.hix.project {
                 src = ./.;
                 evalSystem = "x86_64-linux";
+                modules = [
+                  {
+                    packages.hympd.components.exes.hympd.preBuild = ''
+                    export GIT_REV="${gitRev}"
+                    '';
+                  }
+                ];
               };
           })
         ];

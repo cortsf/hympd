@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Web where
 
@@ -24,6 +25,15 @@ import Text.Pretty.Simple qualified as P
 import Network.MPD qualified as MPD
 import Data.Map.Strict qualified as C
 import System.FilePath.Posix qualified as FP
+import Language.Haskell.TH (stringE, runIO)
+import System.Environment (lookupEnv)
+import Data.Maybe (fromMaybe)
+
+gitRevision :: String
+gitRevision = $(do
+    mRev <- runIO (lookupEnv "GIT_REV")
+    stringE (fromMaybe "dirty" mRev)
+  )
 
 ------------------------------------------------------------
 -- Common
@@ -288,3 +298,15 @@ settingsPage options user_config = do
         hr_ [class_ "h-1 my-4 border-0 bg-gray-400 dark:bg-gray-500"]
         div_ $ do
           button_ [id_ "updateAll", class_ "bg-blue-500 hover:bg-blue-600 py-2 px-4 my-4 rounded text-white flex items-center gap-x-1"] $ "Update DB"
+      div_ [class_ "mt-4 bg-slate-600 text-slate-300 rounded px-8 py-4 min-w-full md:min-w-3/4 flex flex-col justify-items-start w-fit "] $ do
+        h1_ [class_ "text-xl"] $ "About Hympd"
+        hr_ [class_ "h-1 my-4 border-0 bg-gray-400 dark:bg-gray-500"]
+        p_ $ do
+          "Using hympd rev: " 
+          if gitRevision == "dirty" then 
+            "dirty"
+            else 
+            (a_ [href_ $ "https://github.com/cortsf/hympd/commit/" <> T.pack gitRevision, class_ "text-sky-600 dark:text-sky-600"] $ (toHtml $ gitRevision))
+        p_ $ do
+          "Check latest release version: "
+          a_ [href_ "https://github.com/cortsf/hympd/releases", class_ "text-sky-600 dark:text-sky-600"] $ "cortsf/hympd"
