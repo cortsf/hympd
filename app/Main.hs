@@ -27,8 +27,10 @@ import Servant.API.WebSocket
 import Options.Applicative
 import Network.MPD qualified as MPD
 import Servant.Static.TH qualified as SS
+import Language.Haskell.TH.Syntax (addDependentFile)
 
 -- * Static
+$(addDependentFile "static/styles.css" >> return [])
 
 type StaticAPI = $(SS.createApiType "static")
 

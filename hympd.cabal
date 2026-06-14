@@ -28,6 +28,7 @@ executable hympd
                     , servant-websockets
                     , servant-lucid
                     , servant-static-th
+                    , template-haskell
                     , warp
                     , wai
                     , cookie

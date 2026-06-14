@@ -1,2 +1,12 @@
 @import "tailwindcss";
+
 @custom-variant dark (&:where(.dark, .dark *));
+
+*, *::before, *::after, 
+*:focus, *:active, *:focus-visible, *:focus-within {
+  outline: none !important;
+  outline-style: none !important;
+  outline-width: 0px !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+}
