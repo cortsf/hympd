@@ -28,6 +28,8 @@ import Options.Applicative
 import Network.MPD qualified as MPD
 import Servant.Static.TH qualified as SS
 import Language.Haskell.TH.Syntax (addDependentFile)
+import Control.Concurrent (getNumCapabilities)
+
 
 -- * Static
 $(addDependentFile "static/styles.css" >> return [])
@@ -70,6 +72,8 @@ confParser = do
 
 main :: IO ()
 main = do
+  cores <- getNumCapabilities
+  putStrLn $ "Active GHC Runtime Cores: " ++ show cores
   args <- parseArgs
   runServer $ args
 

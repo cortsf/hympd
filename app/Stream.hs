@@ -105,7 +105,7 @@ instance A.ToJSON ClientMessage where
 streamData :: MonadIO m => Options -> WS.PendingConnection -> m ()
 streamData options pc = do
   conn <- liftIO $ WS.acceptRequest pc
-  liftIO $ WS.withPingThread conn 30 (return ()) $ do
+  liftIO $ WS.withPingThread conn 10 (return ()) $ do
     _  <- forkIO $ forever $ do 
       idle_subsystemsResponse <- withMpdOpt options $ MPD.idle [MPD.MixerS, MPD.PlayerS, MPD.PlaylistS, MPD.OptionsS]
       case idle_subsystemsResponse of

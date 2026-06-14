@@ -15,6 +15,7 @@ extra-doc-files:    CHANGELOG.md
 common warnings
     ghc-options: -Wall
                  -threaded
+                 -with-rtsopts=-N2
 
 executable hympd
     import:           warnings
