@@ -165,7 +165,7 @@ jsblock = T.pack $ show $ renderJs $
 
          ///////////////////////////////// Socket
 
-         socket = new WebSocket("ws://" + window.location.host + "/websocket");
+         socket = new WebSocket(window.location.protocol.replace("http", "ws") + "//" + window.location.host + "/websocket");
          socket.onopen = function() {
            document.querySelector('#navPrevious').addEventListener('click', function() {socket.send('previous')}, false);
            document.querySelector('#navStop').addEventListener('click', function (){socket.send('stop')}, false);
